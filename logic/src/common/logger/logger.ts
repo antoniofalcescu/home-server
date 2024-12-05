@@ -1,7 +1,8 @@
 import { LOG_LEVEL } from './constants';
 
+// use pino, pino-loki + Grafana to send and visualize logs
 export class Logger {
-  public info(message: string, metadata: object) {
+  public info(message: string, metadata: object = {}) {
     const log = {
       level: LOG_LEVEL.INFO,
       timestamp: Date.now(),
@@ -11,7 +12,7 @@ export class Logger {
     console.dir(log, { colors: true, depth: null });
   }
 
-  public warn(message: string, metadata: object) {
+  public warn(message: string, metadata: object = {}) {
     const log = {
       level: LOG_LEVEL.WARN,
       timestamp: Date.now(),
@@ -21,7 +22,7 @@ export class Logger {
     console.dir(log, { colors: true, depth: null });
   }
 
-  public error(message: string, metadata: object) {
+  public error(message: string, metadata: object = {}) {
     const log = {
       level: LOG_LEVEL.ERROR,
       timestamp: Date.now(),
