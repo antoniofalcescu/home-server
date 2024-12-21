@@ -1,16 +1,14 @@
 import { Request, Response } from 'express';
+import { Container } from '../injectable';
+import { SERVICE_NAME } from '../injectable/constants';
 import { CredentialsService } from './credentials-service';
 
 export class CredentialsController {
-  private readonly credentialsService: CredentialsService;
-
-  constructor() {
-    this.credentialsService = new CredentialsService();
-  }
-
   public async getCredentials(_: Request, res: Response): Promise<void> {
+    const credentialsService = Container.get<CredentialsService>(SERVICE_NAME.CREDENTIALS);
+
     try {
-      const cookies = await this.credentialsService.getCredentials();
+      const cookies = await credentialsService.getCredentials();
       console.log(cookies);
       res.sendStatus(200);
     } catch {

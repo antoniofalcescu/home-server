@@ -1,5 +1,6 @@
 import express from 'express';
 import { credentialsRouter, torrentRouter } from './logic/src/common/router';
+import { Container } from './logic/src/injectable';
 
 const app = express();
 const port = 3000;
@@ -92,10 +93,11 @@ const DOWNLOAD_URL = 'https://filelist.io/download.php?id=';
 //
 //   res.send('Hello World!');
 // });
-
+app.use(express.json());
 app.use(credentialsRouter);
 app.use(torrentRouter);
 
-app.listen(port, () => {
+app.listen(port, async () => {
+  await Container.init();
   console.log(`Example app listening on port ${port}`);
 });

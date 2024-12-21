@@ -1,0 +1,14 @@
+[
+  {
+    "name": "CredentialsService",
+    "path": "./dist/logic/src/credentials/credentials-service.js"
+  },
+  {
+    "name": "ContextService",
+    "path": "./dist/logic/src/context/context-service.js"
+  },
+  {
+    "name": "TorrentService",
+    "path": "./dist/logic/src/torrent/torrent-service.js"
+  }
+]
