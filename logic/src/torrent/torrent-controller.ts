@@ -40,4 +40,61 @@ export class TorrentController {
       console.error((error as Error).message);
     }
   }
+
+  public async getStatus(_: Request, res: Response): Promise<void> {
+    const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
+
+    try {
+      const downloadRes = await torrentService.getStatus();
+      res.status(200).json(downloadRes);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+      console.error((error as Error).message);
+    }
+  }
+
+  public async resume(req: Request, res: Response): Promise<void> {
+    const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
+
+    try {
+      const {
+        body: { id },
+      } = req;
+      const downloadRes = await torrentService.resume(id);
+      res.status(200).json(downloadRes);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+      console.error((error as Error).message);
+    }
+  }
+
+  public async pause(req: Request, res: Response): Promise<void> {
+    const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
+
+    try {
+      const {
+        body: { id },
+      } = req;
+      const downloadRes = await torrentService.pause(id);
+      res.status(200).json(downloadRes);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+      console.error((error as Error).message);
+    }
+  }
+
+  public async remove(req: Request, res: Response): Promise<void> {
+    const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
+
+    try {
+      const {
+        body: { id, shouldDelete },
+      } = req;
+      const downloadRes = await torrentService.remove(id, shouldDelete);
+      res.status(200).json(downloadRes);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+      console.error((error as Error).message);
+    }
+  }
 }

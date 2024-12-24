@@ -2,17 +2,23 @@ import * as cheerio from 'cheerio';
 import * as fs from 'node:fs';
 import { Context } from '../context/types';
 import { DOWNLOAD_ENDPOINT, SEARCH_ENDPOINT, TORRENT_MAPPING } from './constants';
+import { ITorrentDownloader } from './downloaders';
+import { TransmissionRemote } from './downloaders/transmission-remote';
 import { TorrentNotFoundError } from './errors';
 
 export class TorrentService {
+  private readonly torrentDownloader: ITorrentDownloader;
+
+  constructor() {
+    this.torrentDownloader = new TransmissionRemote();
+  }
+
   public async search(context: Context, name: string): Promise<string[]> {
     const {
       credentials: {
         torrent: { cookies },
       },
     } = context;
-
-    console.log(`${SEARCH_ENDPOINT}?search=${encodeURIComponent(name)}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`);
 
     const searchResponse = await fetch(
       `${SEARCH_ENDPOINT}?search=${encodeURIComponent(name)}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`,
@@ -34,6 +40,16 @@ export class TorrentService {
   }
 
   public async download(context: Context, id: string): Promise<any> {
+    // TODO: take this PATH dynamically either based on OS or on dev/prod env
+    // const TORRENT_DOWNLOAD_PATH = `/Users/antonio/Documents`;
+    const TORRENT_DOWNLOAD_PATH = '/srv/dev-disk-by-uuid-d23d2653-600a-46dd-b164-9ac0867e4d43/cutie-pie/downloads';
+    const torrentPath = `${TORRENT_DOWNLOAD_PATH}/${id}.torrent`;
+    if (fs.existsSync(torrentPath)) {
+      console.log('torrent is saved locally');
+      await this.torrentDownloader.start(torrentPath);
+      return { status: 'cache' };
+    }
+
     const {
       credentials: {
         torrent: { cookies },
@@ -50,53 +66,30 @@ export class TorrentService {
     const buffer = await downloadRes.arrayBuffer();
     const fileArray = new Uint8Array(buffer);
 
-    // TODO: continue here with starting the download - doing error handling and maybe do methods for handling the download lifecycle
-    // -> stop, resume, get status, remove
-    const filePath = `/Users/antonio/Documents/${id}.torrent`;
-    fs.writeFileSync(filePath, fileArray);
-    console.log(`Torrent file saved to ${filePath}`);
+    fs.writeFileSync(torrentPath, fileArray);
+    console.log(`Torrent file saved to ${torrentPath}`);
+    await this.torrentDownloader.start(torrentPath);
     return {};
-    //
-    // const cmd = spawn('transmission-remote', ['-a', filePath]);
-    //
-    // cmd.stdout.on('data', (data) => {
-    //   console.log(`stdout: ${data}`);
-    // });
-    //
-    // cmd.stderr.on('data', (data) => {
-    //   console.error(`stderr: ${data}`);
-    // });
-    //
-    // cmd.on('close', (code) => {
-    //   console.log(`child process exited with code ${code}`);
-    // });
-    //
-    // const cmd2 = spawn('transmission-remote', ['-l']);
-    //
-    // cmd2.stdout.on('data', (data) => {
-    //   console.log(`stdout: ${data}`);
-    // });
-    //
-    // cmd2.stderr.on('data', (data) => {
-    //   console.error(`stderr: ${data}`);
-    // });
-    //
-    // cmd2.on('close', (code) => {
-    //   console.log(`child process exited with code ${code}`);
-    // });
+  }
 
-    // ceva.each((index, element) => {
-    //   // Get the content of the element
-    //   const content = $(element).html();
-    //   const idElement = $(element).find('a[href^="details.php?id="]')
-    //   const id = idElement?.attr('href')?.split('id=')[1];
-    //
-    //   // Print the extracted ID
-    //   console.log(`Torrent row ${index + 1} - ID: ${id}`);
-    //
-    //   // Process the content as needed (e.g., extract specific data)
-    //   // console.log(`Torrent row ${index + 1}:`, content);
-    // });
+  public async getStatus(): Promise<any> {
+    await this.torrentDownloader.getStatus();
+    return {};
+  }
+
+  public async resume(id: string): Promise<any> {
+    await this.torrentDownloader.resume(id);
+    return {};
+  }
+
+  public async pause(id: string): Promise<any> {
+    await this.torrentDownloader.pause(id);
+    return {};
+  }
+
+  public async remove(id: string, shouldDelete: boolean): Promise<any> {
+    await this.torrentDownloader.remove(id, shouldDelete);
+    return {};
   }
 
   private async _extractTorrentIds(response: Response): Promise<string[]> {
