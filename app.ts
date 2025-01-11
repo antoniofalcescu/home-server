@@ -1,4 +1,5 @@
 import express from 'express';
+import { EnvHelper } from './logic/src/common/helpers';
 import { credentialsRouter, torrentRouter } from './logic/src/common/router';
 import { Container } from './logic/src/injectable';
 
@@ -11,6 +12,7 @@ app.use(credentialsRouter);
 app.use(torrentRouter);
 
 app.listen(port, async () => {
+  EnvHelper.verify();
   await Container.init();
   console.log(`Example app listening on port ${port}`);
 });

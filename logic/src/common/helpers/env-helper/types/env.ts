@@ -1,0 +1,6 @@
+export type Env = {
+  TORRENT_PROVIDER_BASE_URL: string;
+  TORRENT_PROVIDER_USERNAME: string;
+  TORRENT_PROVIDER_PASSWORD: string;
+  TORRENT_DOWNLOAD_PATH: string;
+};

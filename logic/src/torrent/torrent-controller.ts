@@ -13,8 +13,8 @@ export class TorrentController {
         context,
         body: { name },
       } = req;
-      const searchResponse = await torrentService.search(context, name);
-      res.status(200).json(searchResponse);
+      const response = await torrentService.search(context, name);
+      res.status(200).json(response);
     } catch (error) {
       console.error(error);
       if (error instanceof TorrentNotFoundError) {
@@ -33,8 +33,8 @@ export class TorrentController {
         context,
         body: { id },
       } = req;
-      const downloadRes = await torrentService.download(context, id);
-      res.status(200).json(downloadRes);
+      const response = await torrentService.download(context, id);
+      res.status(200).json(response);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
       console.error((error as Error).message);
@@ -45,8 +45,25 @@ export class TorrentController {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
-      const downloadRes = await torrentService.getStatus();
-      res.status(200).json(downloadRes);
+      const response = await torrentService.getStatus();
+      res.status(200).json(response);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+      console.error((error as Error).message);
+    }
+  }
+
+  // TODO: add validations for input
+  public async getStatusById(req: Request, res: Response): Promise<void> {
+    const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
+
+    try {
+      const {
+        params: { id },
+      } = req;
+
+      const response = await torrentService.getStatusById(id);
+      res.status(200).json(response);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
       console.error((error as Error).message);
@@ -60,8 +77,8 @@ export class TorrentController {
       const {
         body: { id },
       } = req;
-      const downloadRes = await torrentService.resume(id);
-      res.status(200).json(downloadRes);
+      const response = await torrentService.resume(id);
+      res.status(200).json(response);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
       console.error((error as Error).message);
@@ -75,8 +92,8 @@ export class TorrentController {
       const {
         body: { id },
       } = req;
-      const downloadRes = await torrentService.pause(id);
-      res.status(200).json(downloadRes);
+      const response = await torrentService.pause(id);
+      res.status(200).json(response);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
       console.error((error as Error).message);
@@ -90,8 +107,8 @@ export class TorrentController {
       const {
         body: { id, shouldDelete },
       } = req;
-      const downloadRes = await torrentService.remove(id, shouldDelete);
-      res.status(200).json(downloadRes);
+      const response = await torrentService.remove(id, shouldDelete);
+      res.status(200).json(response);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
       console.error((error as Error).message);

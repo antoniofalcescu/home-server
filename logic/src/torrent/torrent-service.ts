@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'node:fs';
+import { EnvHelper } from '../common/helpers';
 import { Context } from '../context/types';
 import { DOWNLOAD_ENDPOINT, SEARCH_ENDPOINT, TORRENT_MAPPING } from './constants';
 import { ITorrentDownloader } from './downloaders';
@@ -40,10 +41,9 @@ export class TorrentService {
   }
 
   public async download(context: Context, id: string): Promise<any> {
-    // TODO: take this PATH dynamically either based on OS or on dev/prod env
-    // const TORRENT_DOWNLOAD_PATH = `/Users/antonio/Documents`;
-    const TORRENT_DOWNLOAD_PATH = '/srv/dev-disk-by-uuid-d23d2653-600a-46dd-b164-9ac0867e4d43/cutie-pie/downloads';
+    const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
     const torrentPath = `${TORRENT_DOWNLOAD_PATH}/${id}.torrent`;
+
     if (fs.existsSync(torrentPath)) {
       console.log('torrent is saved locally');
       await this.torrentDownloader.start(torrentPath);
@@ -73,8 +73,15 @@ export class TorrentService {
   }
 
   public async getStatus(): Promise<any> {
-    await this.torrentDownloader.getStatus();
-    return {};
+    const status = this.torrentDownloader.getStatus();
+    console.log(status);
+    return status;
+  }
+
+  public async getStatusById(id: string): Promise<any> {
+    const status = this.torrentDownloader.getStatusById(id);
+    console.log(status);
+    return status;
   }
 
   public async resume(id: string): Promise<any> {
@@ -93,7 +100,7 @@ export class TorrentService {
   }
 
   private async _extractTorrentIds(response: Response): Promise<string[]> {
-    // TODO: make this easier to change - extract it either in body, in .env or somewhere else
+    // TODO: make this easier to change - extract it either in body, in .env-helper or somewhere else
     const TORRENT_IDS_LIMIT = 2;
     const torrentIds = new Set<string>();
 

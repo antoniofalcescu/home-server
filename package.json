@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "build": "rimraf ./dist && tsc -p tsconfig.build.json",
-    "dev": "node --env-file=.env ./dist/app",
+    "dev": "npm run build && node --env-file=.env ./dist/app",
     "lint": "eslint . --fix"
   },
   "keywords": [],

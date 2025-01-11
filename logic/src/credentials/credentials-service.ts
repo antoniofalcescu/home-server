@@ -1,9 +1,10 @@
 import playwright from 'playwright';
 import { HOUR_IN_MILLISECONDS } from '../common/constants';
+import { EnvHelper } from '../common/helpers';
 import { Logger } from '../common/logger';
 import { TORRENT_PROVIDER_FIELD } from './constants';
 import { CredentialsDal } from './credentials-dal';
-import { DalError, EnvError } from './errors';
+import { DalError } from './errors';
 import { Credentials, TorrentCredentials } from './types';
 
 export class CredentialsService {
@@ -36,7 +37,7 @@ export class CredentialsService {
 
     let browser;
     try {
-      const { TORRENT_PROVIDER_BASE_URL, TORRENT_PROVIDER_USERNAME, TORRENT_PROVIDER_PASSWORD } = this._getEnv();
+      const { TORRENT_PROVIDER_BASE_URL, TORRENT_PROVIDER_USERNAME, TORRENT_PROVIDER_PASSWORD } = EnvHelper.get();
 
       browser = await playwright.chromium.launch({ headless: true });
       const page = await browser.newPage();
@@ -60,25 +61,5 @@ export class CredentialsService {
     }
   }
 
-  private _getEnv() {
-    const { TORRENT_PROVIDER_BASE_URL, TORRENT_PROVIDER_USERNAME, TORRENT_PROVIDER_PASSWORD } = process.env;
-
-    if (!TORRENT_PROVIDER_BASE_URL) {
-      throw new EnvError('TORRENT_PROVIDER_BASE_URL undefined in .env file');
-    }
-
-    if (!TORRENT_PROVIDER_USERNAME) {
-      throw new EnvError('TORRENT_PROVIDER_USERNAME undefined in .env file');
-    }
-
-    if (!TORRENT_PROVIDER_PASSWORD) {
-      throw new EnvError('TORRENT_PROVIDER_PASSWORD undefined in .env file');
-    }
-
-    return {
-      TORRENT_PROVIDER_BASE_URL,
-      TORRENT_PROVIDER_USERNAME,
-      TORRENT_PROVIDER_PASSWORD,
-    };
-  }
+  private _getEnv() {}
 }
