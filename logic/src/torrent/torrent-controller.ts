@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { Container } from '../injectable';
 import { SERVICE_NAME } from '../injectable/constants';
+import { UnrecognizedTorrentError } from './downloaders/transmission-remote/errors';
+import { TransmissionDaemonDownError } from './downloaders/transmission-remote/errors/transmission-daemon-down-error';
 import { TorrentNotFoundError } from './errors';
 import { TorrentService } from './torrent-service';
 
@@ -33,11 +35,16 @@ export class TorrentController {
         context,
         body: { id },
       } = req;
-      const response = await torrentService.download(context, id);
-      res.status(200).json(response);
+      await torrentService.download(context, id);
+      res.status(201).json({ message: 'Created' });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-      console.error((error as Error).message);
+      if (error instanceof TransmissionDaemonDownError) {
+        res.status(503).json({ message: 'Service Unavailable' });
+      } else if (error instanceof UnrecognizedTorrentError) {
+        res.status(400).json({ message: 'Bad Request' });
+      } else {
+        res.status(500).json({ message: 'Internal Server Error' });
+      }
     }
   }
 

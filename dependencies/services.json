@@ -1,5 +1,9 @@
 [
   {
+    "name": "LoggerService",
+    "path": "./dist/logic/src/logger/logger-service.js"
+  },
+  {
     "name": "CredentialsService",
     "path": "./dist/logic/src/credentials/credentials-service.js"
   },

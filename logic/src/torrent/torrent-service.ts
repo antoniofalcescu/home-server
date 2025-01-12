@@ -2,15 +2,23 @@ import * as cheerio from 'cheerio';
 import * as fs from 'node:fs';
 import { EnvHelper } from '../common/helpers';
 import { Context } from '../context/types';
+import { Container } from '../injectable';
+import { SERVICE_NAME } from '../injectable/constants';
+import { LoggerService } from '../logger';
 import { DOWNLOAD_ENDPOINT, SEARCH_ENDPOINT, TORRENT_MAPPING } from './constants';
 import { ITorrentDownloader } from './downloaders';
 import { TransmissionRemote } from './downloaders/transmission-remote';
+import { TorrentData } from './downloaders/transmission-remote/helpers/builders/torrent-data-from-buffer-builder/types';
 import { TorrentNotFoundError } from './errors';
 
 export class TorrentService {
+  private readonly loggerService: LoggerService;
+
   private readonly torrentDownloader: ITorrentDownloader;
 
   constructor() {
+    this.loggerService = Container.get<LoggerService>(SERVICE_NAME.LOGGER);
+
     this.torrentDownloader = new TransmissionRemote();
   }
 
@@ -40,42 +48,52 @@ export class TorrentService {
     return torrentIds;
   }
 
-  public async download(context: Context, id: string): Promise<any> {
+  public async download(context: Context, id: string): Promise<void> {
     const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
     const torrentPath = `${TORRENT_DOWNLOAD_PATH}/${id}.torrent`;
 
-    if (fs.existsSync(torrentPath)) {
-      console.log('torrent is saved locally');
-      await this.torrentDownloader.start(torrentPath);
-      return { status: 'cache' };
+    if (!fs.existsSync(torrentPath)) {
+      const {
+        credentials: {
+          torrent: { cookies },
+        },
+      } = context;
+
+      const downloadRes = await fetch(`${DOWNLOAD_ENDPOINT}?id=${encodeURIComponent(id)}`, {
+        credentials: 'include',
+        headers: {
+          Cookie: cookies,
+        },
+      });
+
+      const buffer = await downloadRes.arrayBuffer();
+      const fileArray = new Uint8Array(buffer);
+
+      fs.writeFileSync(torrentPath, fileArray);
     }
 
-    const {
-      credentials: {
-        torrent: { cookies },
-      },
-    } = context;
+    try {
+      this.torrentDownloader.start(torrentPath);
+    } catch (error) {
+      this.loggerService.warn('Failed to download torrent', {
+        id,
+        error,
+      });
 
-    const downloadRes = await fetch(`${DOWNLOAD_ENDPOINT}?id=${encodeURIComponent(id)}`, {
-      credentials: 'include',
-      headers: {
-        Cookie: cookies,
-      },
-    });
-
-    const buffer = await downloadRes.arrayBuffer();
-    const fileArray = new Uint8Array(buffer);
-
-    fs.writeFileSync(torrentPath, fileArray);
-    console.log(`Torrent file saved to ${torrentPath}`);
-    await this.torrentDownloader.start(torrentPath);
-    return {};
+      throw error;
+    }
   }
 
-  public async getStatus(): Promise<any> {
-    const status = this.torrentDownloader.getStatus();
-    console.log(status);
-    return status;
+  public async getStatus(): Promise<TorrentData[]> {
+    try {
+      return this.torrentDownloader.getStatus();
+    } catch (error) {
+      this.loggerService.warn('Failed to get status for all torrents', {
+        error,
+      });
+
+      throw error;
+    }
   }
 
   public async getStatusById(id: string): Promise<any> {

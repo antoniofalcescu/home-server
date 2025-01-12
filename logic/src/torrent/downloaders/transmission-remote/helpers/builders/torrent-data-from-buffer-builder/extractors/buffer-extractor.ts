@@ -67,7 +67,6 @@ export class BufferExtractor {
       const key = TransmissionRemoteUtils.toCamelCase([action, relation].join(' '));
       peers[key] = Number(value);
     }
-    console.log(peers);
     return peers;
   }
 

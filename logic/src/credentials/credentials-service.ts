@@ -1,18 +1,21 @@
 import playwright from 'playwright';
 import { HOUR_IN_MILLISECONDS } from '../common/constants';
 import { EnvHelper } from '../common/helpers';
-import { Logger } from '../common/logger';
+import { Container } from '../injectable';
+import { SERVICE_NAME } from '../injectable/constants';
+import { LoggerService } from '../logger';
 import { TORRENT_PROVIDER_FIELD } from './constants';
 import { CredentialsDal } from './credentials-dal';
 import { DalError } from './errors';
 import { Credentials, TorrentCredentials } from './types';
 
 export class CredentialsService {
-  private readonly logger: Logger;
+  private readonly loggerService: LoggerService;
+
   private readonly dal: CredentialsDal;
 
   constructor() {
-    this.logger = new Logger();
+    this.loggerService = Container.get<LoggerService>(SERVICE_NAME.LOGGER);
     this.dal = new CredentialsDal();
   }
 
@@ -32,7 +35,7 @@ export class CredentialsService {
         return { cookies: cachedCookies };
       }
     } catch (error) {
-      this.logger.error((error as DalError).message, { error });
+      this.loggerService.error((error as DalError).message, { error });
     }
 
     let browser;
@@ -54,12 +57,10 @@ export class CredentialsService {
       await this.dal.setCookies(serializedCookies, Date.now() + HOUR_IN_MILLISECONDS);
       return { cookies: serializedCookies };
     } catch (error) {
-      this.logger.error((error as Error).message, { error });
+      this.loggerService.error((error as Error).message, { error });
       throw error;
     } finally {
       await browser?.close();
     }
   }
-
-  private _getEnv() {}
 }

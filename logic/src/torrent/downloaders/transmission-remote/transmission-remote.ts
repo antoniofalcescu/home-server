@@ -1,10 +1,12 @@
-import { execSync, spawn } from 'node:child_process';
+import { execSync } from 'node:child_process';
 import { EnvHelper } from '../../../common/helpers';
 import { ITorrentDownloader } from '../interfaces';
+import { TransmissionDaemonDownError, TransmissionRemoteErrorsManager, UnrecognizedTorrentError } from './errors';
 import { TorrentDataFromBufferBuilder } from './helpers/builders/torrent-data-from-buffer-builder';
 import { TorrentData } from './helpers/builders/torrent-data-from-buffer-builder/types';
 
-// TODO: no need for async methods and can replace all methods with either exec or execSync where we return the buffer
+// TODO: when transmission-daemon service goes down the torrents in the list get reassigned ids
+//  need to either make a way to give custom ids or keep track of ids with a request (can do a getStatus in this case to update the ids)
 export class TransmissionRemote implements ITorrentDownloader {
   private readonly torrentDataFromBufferBuilder: TorrentDataFromBufferBuilder;
 
@@ -12,87 +14,61 @@ export class TransmissionRemote implements ITorrentDownloader {
     this.torrentDataFromBufferBuilder = new TorrentDataFromBufferBuilder();
   }
 
-  public async start(torrentPath: string): Promise<void> {
-    const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
-    // TODO: store it in downloads and then another class will have the responsibility to move this file and rename it accordingly based on name/season if show or name if movie
-    const cmd = spawn('transmission-remote', ['--download-dir', TORRENT_DOWNLOAD_PATH, '-a', torrentPath]);
+  public start(torrentPath: string): void {
+    try {
+      const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
+      const DOWNLOAD_TORRENT_CMD = `transmission-remote --download-dir ${TORRENT_DOWNLOAD_PATH} -a ${torrentPath}`;
+      execSync(DOWNLOAD_TORRENT_CMD);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (TransmissionRemoteErrorsManager.isUnrecognizedTorrentError(error)) {
+          const stdout = (error as unknown as { stdout: Buffer }).stdout;
+          const stderr = (error as unknown as { stderr: Buffer }).stderr;
 
-    cmd.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
+          throw new UnrecognizedTorrentError(error.message, stdout, stderr);
+        }
 
-    cmd.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-    });
+        if (TransmissionRemoteErrorsManager.isTransmissionDaemonDownError(error)) {
+          throw new TransmissionDaemonDownError(error.message);
+        }
 
-    cmd.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
+        throw error;
+      }
+    }
+  }
+
+  public pause(torrentId: string): void {
+    const PAUSE_TORRENT_CMD = `transmission-remote -t ${torrentId} -S`;
+    execSync(PAUSE_TORRENT_CMD);
+  }
+
+  public resume(torrentId: string): void {
+    const RESUME_TORRENT_CMD = `transmission-remote -t ${torrentId} -s`;
+    execSync(RESUME_TORRENT_CMD);
+  }
+
+  public remove(torrentId: string, shouldDelete: boolean): void {
+    const removeFlag = shouldDelete ? '--remove-and-delete' : '-r';
+    const REMOVE_TORRENT_CMD = `transmission-remote -t ${torrentId} ${removeFlag}`;
+    execSync(REMOVE_TORRENT_CMD);
   }
 
   public getStatusById(torrentId: string): TorrentData {
-    const COMMAND_TO_GET_TORRENT_STATUS = `transmission-remote -t ${torrentId} -i`;
-    const buffer = execSync(COMMAND_TO_GET_TORRENT_STATUS);
+    const GET_TORRENT_STATUS_CMD = `transmission-remote -t ${torrentId} -i`;
+
+    const buffer = execSync(GET_TORRENT_STATUS_CMD);
     return this.torrentDataFromBufferBuilder.build(buffer);
   }
 
   public getStatus(): TorrentData[] {
-    const COMMAND_TO_GET_TORRENT_IDS = `transmission-remote -l | awk 'NR>1 {print $1}' | grep -E '^[0-9]+$'`;
-    const buffer = execSync(COMMAND_TO_GET_TORRENT_IDS);
+    const GET_TORRENT_IDS_CMD = `transmission-remote -l | awk 'NR>1 {print $1}' | grep -E '^[0-9]+$'`;
+
+    const buffer = execSync(GET_TORRENT_IDS_CMD);
     const torrentIds = buffer.toString().trim().split('\n');
 
     return torrentIds.reduce((acc, torrentId) => {
       acc.push(this.getStatusById(torrentId));
       return acc;
     }, [] as TorrentData[]);
-  }
-
-  public async pause(torrentId: string): Promise<void> {
-    const cmd2 = spawn('transmission-remote', ['-t', torrentId, '-S']);
-
-    cmd2.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
-
-    cmd2.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-    });
-
-    cmd2.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
-  }
-
-  public async resume(torrentId: string): Promise<void> {
-    const cmd2 = spawn('transmission-remote', ['-t', torrentId, '-s']);
-
-    cmd2.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
-
-    cmd2.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-    });
-
-    cmd2.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
-  }
-
-  public async remove(torrentId: string, shouldDelete: boolean): Promise<void> {
-    const removeFlag = shouldDelete ? '--remove-and-delete' : '-r';
-    const cmd2 = spawn('transmission-remote', ['-t', torrentId, removeFlag]);
-
-    cmd2.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
-
-    cmd2.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-    });
-
-    cmd2.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
   }
 }

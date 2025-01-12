@@ -1,8 +1,10 @@
+import { TorrentData } from '../transmission-remote/helpers/builders/torrent-data-from-buffer-builder/types';
+
 export interface ITorrentDownloader {
-  start(torrentPath: string): Promise<void>;
-  resume(torrentId: string): Promise<void>;
-  pause(torrentId: string): Promise<void>;
-  remove(torrentId: string, shouldDelete: boolean): Promise<void>;
-  getStatusById(torrentId: string): any;
-  getStatus(): void;
+  start(torrentPath: string): void;
+  resume(torrentId: string): void;
+  pause(torrentId: string): void;
+  remove(torrentId: string, shouldDelete: boolean): void;
+  getStatusById(torrentId: string): TorrentData;
+  getStatus(): TorrentData[];
 }
