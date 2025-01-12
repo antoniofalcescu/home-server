@@ -22,7 +22,7 @@ export class TorrentService {
     this.torrentDownloader = new TransmissionRemote();
   }
 
-  public async search(context: Context, name: string): Promise<string[]> {
+  public async search(context: Context, torrentName: string): Promise<string[]> {
     const {
       credentials: {
         torrent: { cookies },
@@ -30,7 +30,7 @@ export class TorrentService {
     } = context;
 
     const searchResponse = await fetch(
-      `${SEARCH_ENDPOINT}?search=${encodeURIComponent(name)}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`,
+      `${SEARCH_ENDPOINT}?search=${encodeURIComponent(torrentName)}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`,
       {
         credentials: 'include',
         headers: {
@@ -42,15 +42,15 @@ export class TorrentService {
     const torrentIds = await this._extractTorrentIds(searchResponse);
 
     if (torrentIds.length === 0) {
-      throw new TorrentNotFoundError(`Failed to find torrent for input: ${name}`);
+      throw new TorrentNotFoundError(`Failed to find torrent for input: ${torrentName}`);
     }
 
     return torrentIds;
   }
 
-  public async download(context: Context, id: string): Promise<void> {
+  public async download(context: Context, torrentId: string): Promise<void> {
     const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
-    const torrentPath = `${TORRENT_DOWNLOAD_PATH}/${id}.torrent`;
+    const torrentPath = `${TORRENT_DOWNLOAD_PATH}/${torrentId}.torrent`;
 
     if (!fs.existsSync(torrentPath)) {
       const {
@@ -59,7 +59,7 @@ export class TorrentService {
         },
       } = context;
 
-      const downloadRes = await fetch(`${DOWNLOAD_ENDPOINT}?id=${encodeURIComponent(id)}`, {
+      const downloadRes = await fetch(`${DOWNLOAD_ENDPOINT}?id=${encodeURIComponent(torrentId)}`, {
         credentials: 'include',
         headers: {
           Cookie: cookies,
@@ -76,7 +76,7 @@ export class TorrentService {
       this.torrentDownloader.start(torrentPath);
     } catch (error) {
       this.loggerService.warn('Failed to download torrent', {
-        id,
+        torrentPath,
         error,
       });
 
@@ -84,37 +84,64 @@ export class TorrentService {
     }
   }
 
-  public async getStatus(): Promise<TorrentData[]> {
+  public resume(torrentIndex: number): void {
+    try {
+      this.torrentDownloader.resume(torrentIndex);
+    } catch (error) {
+      this.loggerService.warn('Failed to resume torrent', {
+        torrentIndex,
+        error,
+      });
+
+      throw error;
+    }
+  }
+
+  public pause(torrentIndex: number): void {
+    try {
+      this.torrentDownloader.pause(torrentIndex);
+    } catch (error) {
+      this.loggerService.warn('Failed to resume torrent', {
+        torrentIndex,
+        error,
+      });
+
+      throw error;
+    }
+  }
+
+  public remove(torrentIndex: number, shouldDelete: boolean): void {
+    try {
+      this.torrentDownloader.remove(torrentIndex, shouldDelete);
+    } catch (error) {
+      this.loggerService.warn('Failed to resume torrent', {
+        torrentIndex,
+        shouldDelete,
+        error,
+      });
+
+      throw error;
+    }
+  }
+
+  public getStatus(): TorrentData[] {
     try {
       return this.torrentDownloader.getStatus();
     } catch (error) {
-      this.loggerService.warn('Failed to get status for all torrents', {
-        error,
-      });
+      this.loggerService.warn('Failed to get status for all torrents', { error });
 
       throw error;
     }
   }
 
-  public async getStatusById(id: string): Promise<any> {
-    const status = this.torrentDownloader.getStatusById(id);
-    console.log(status);
-    return status;
-  }
+  public getStatusByIndex(torrentIndex: number): TorrentData | undefined {
+    try {
+      return this.torrentDownloader.getStatusByIndex(torrentIndex);
+    } catch (error) {
+      this.loggerService.warn('Failed to get status for torrent by index', { torrentIndex, error });
 
-  public async resume(id: string): Promise<any> {
-    await this.torrentDownloader.resume(id);
-    return {};
-  }
-
-  public async pause(id: string): Promise<any> {
-    await this.torrentDownloader.pause(id);
-    return {};
-  }
-
-  public async remove(id: string, shouldDelete: boolean): Promise<any> {
-    await this.torrentDownloader.remove(id, shouldDelete);
-    return {};
+      throw error;
+    }
   }
 
   private async _extractTorrentIds(response: Response): Promise<string[]> {

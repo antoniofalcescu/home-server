@@ -2,9 +2,9 @@ import { TorrentData } from '../transmission-remote/helpers/builders/torrent-dat
 
 export interface ITorrentDownloader {
   start(torrentPath: string): void;
-  resume(torrentId: string): void;
-  pause(torrentId: string): void;
-  remove(torrentId: string, shouldDelete: boolean): void;
-  getStatusById(torrentId: string): TorrentData;
+  resume(torrentIndex: number): void;
+  pause(torrentIndex: number): void;
+  remove(torrentIndex: number, shouldDelete: boolean): void;
+  getStatusByIndex(torrentIndex: number): TorrentData | undefined;
   getStatus(): TorrentData[];
 }

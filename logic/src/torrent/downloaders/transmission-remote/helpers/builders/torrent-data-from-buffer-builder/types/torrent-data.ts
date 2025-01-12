@@ -1,5 +1,5 @@
 export type TorrentData = {
-  id: number;
+  index: number;
   name: string;
   location: string;
   status: TorrentStatus;

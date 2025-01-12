@@ -14,7 +14,7 @@ export class TorrentDataFromBufferBuilder {
     const parsedBuffer = this._parseBuffer(buffer);
 
     return {
-      id: Number(parsedBuffer.id),
+      index: Number(parsedBuffer.id),
       name: parsedBuffer.name,
       location: parsedBuffer.location,
       status: this._buildStatus(parsedBuffer),

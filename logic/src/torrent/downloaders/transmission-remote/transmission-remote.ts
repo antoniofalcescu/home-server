@@ -37,37 +37,49 @@ export class TransmissionRemote implements ITorrentDownloader {
     }
   }
 
-  public pause(torrentId: string): void {
-    const PAUSE_TORRENT_CMD = `transmission-remote -t ${torrentId} -S`;
+  public pause(torrentIndex: number): void {
+    const PAUSE_TORRENT_CMD = `transmission-remote -t ${torrentIndex} -S`;
     execSync(PAUSE_TORRENT_CMD);
   }
 
-  public resume(torrentId: string): void {
-    const RESUME_TORRENT_CMD = `transmission-remote -t ${torrentId} -s`;
+  public resume(torrentIndex: number): void {
+    const RESUME_TORRENT_CMD = `transmission-remote -t ${torrentIndex} -s`;
     execSync(RESUME_TORRENT_CMD);
   }
 
-  public remove(torrentId: string, shouldDelete: boolean): void {
+  public remove(torrentIndex: number, shouldDelete: boolean): void {
     const removeFlag = shouldDelete ? '--remove-and-delete' : '-r';
-    const REMOVE_TORRENT_CMD = `transmission-remote -t ${torrentId} ${removeFlag}`;
+    const REMOVE_TORRENT_CMD = `transmission-remote -t ${torrentIndex} ${removeFlag}`;
     execSync(REMOVE_TORRENT_CMD);
   }
 
-  public getStatusById(torrentId: string): TorrentData {
-    const GET_TORRENT_STATUS_CMD = `transmission-remote -t ${torrentId} -i`;
+  public getStatusByIndex(torrentIndex: number): TorrentData | undefined {
+    const GET_TORRENT_STATUS_CMD = `transmission-remote -t ${torrentIndex} -i`;
 
     const buffer = execSync(GET_TORRENT_STATUS_CMD);
+    if (!buffer.length) {
+      return;
+    }
+
     return this.torrentDataFromBufferBuilder.build(buffer);
   }
 
   public getStatus(): TorrentData[] {
-    const GET_TORRENT_IDS_CMD = `transmission-remote -l | awk 'NR>1 {print $1}' | grep -E '^[0-9]+$'`;
+    const GET_TORRENT_IDS_CMD = `transmission-remote -l | awk 'NR>1 {print $1}' | grep -E '^[0-9]+$' || true`;
 
     const buffer = execSync(GET_TORRENT_IDS_CMD);
-    const torrentIds = buffer.toString().trim().split('\n');
 
-    return torrentIds.reduce((acc, torrentId) => {
-      acc.push(this.getStatusById(torrentId));
+    if (!buffer.length) {
+      return [];
+    }
+
+    const torrentIndexes = buffer.toString().trim().split('\n');
+    return torrentIndexes.reduce((acc, torrentIndex) => {
+      const torrent = this.getStatusByIndex(Number(torrentIndex));
+      if (torrent) {
+        acc.push(torrent);
+      }
+
       return acc;
     }, [] as TorrentData[]);
   }

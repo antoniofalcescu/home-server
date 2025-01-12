@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
+import { HTTP_RESPONSE } from '../common/constants';
 import { Container } from '../injectable';
 import { SERVICE_NAME } from '../injectable/constants';
-import { UnrecognizedTorrentError } from './downloaders/transmission-remote/errors';
-import { TransmissionDaemonDownError } from './downloaders/transmission-remote/errors/transmission-daemon-down-error';
+import { TransmissionDaemonDownError, UnrecognizedTorrentError } from './downloaders/transmission-remote/errors';
 import { TorrentNotFoundError } from './errors';
 import { TorrentService } from './torrent-service';
 
+// TODO: add validations for input (ajv and check if torrents exist)
 export class TorrentController {
   public async search(req: Request, res: Response): Promise<void> {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
@@ -13,17 +14,24 @@ export class TorrentController {
     try {
       const {
         context,
-        body: { name },
+        body: { torrentName },
       } = req;
-      const response = await torrentService.search(context, name);
-      res.status(200).json(response);
+
+      const torrents = await torrentService.search(context, torrentName);
+
+      res.status(HTTP_RESPONSE.OK.CODE).json({
+        message: HTTP_RESPONSE.OK.MESSAGE,
+        torrents,
+      });
     } catch (error) {
-      console.error(error);
       if (error instanceof TorrentNotFoundError) {
-        res.status(404).json({ message: 'Not found' });
-      } else {
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(HTTP_RESPONSE.NOT_FOUND.CODE).json({ message: HTTP_RESPONSE.NOT_FOUND.MESSAGE });
+        return;
       }
+
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 
@@ -33,18 +41,26 @@ export class TorrentController {
     try {
       const {
         context,
-        body: { id },
+        body: { torrentId },
       } = req;
-      await torrentService.download(context, id);
-      res.status(201).json({ message: 'Created' });
+
+      await torrentService.download(context, torrentId);
+
+      res.status(HTTP_RESPONSE.CREATED.CODE).json({ message: HTTP_RESPONSE.CREATED.MESSAGE });
     } catch (error) {
       if (error instanceof TransmissionDaemonDownError) {
-        res.status(503).json({ message: 'Service Unavailable' });
-      } else if (error instanceof UnrecognizedTorrentError) {
-        res.status(400).json({ message: 'Bad Request' });
-      } else {
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(HTTP_RESPONSE.SERVICE_UNAVAILABLE.CODE).json({ message: HTTP_RESPONSE.SERVICE_UNAVAILABLE.MESSAGE });
+        return;
       }
+
+      if (error instanceof UnrecognizedTorrentError) {
+        res.status(HTTP_RESPONSE.BAD_REQUEST.CODE).json({ message: HTTP_RESPONSE.BAD_REQUEST.MESSAGE });
+        return;
+      }
+
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 
@@ -52,28 +68,43 @@ export class TorrentController {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
-      const response = await torrentService.getStatus();
-      res.status(200).json(response);
+      const torrents = torrentService.getStatus();
+
+      res.status(HTTP_RESPONSE.OK.CODE).json({
+        message: HTTP_RESPONSE.OK.MESSAGE,
+        torrents,
+      });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-      console.error((error as Error).message);
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 
   // TODO: add validations for input
-  public async getStatusById(req: Request, res: Response): Promise<void> {
+  public async getStatusByIndex(req: Request, res: Response): Promise<void> {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
       const {
-        params: { id },
+        params: { torrentIndex },
       } = req;
 
-      const response = await torrentService.getStatusById(id);
-      res.status(200).json(response);
+      const torrent = torrentService.getStatusByIndex(torrentIndex as unknown as number);
+
+      if (!torrent) {
+        res.status(HTTP_RESPONSE.NOT_FOUND.CODE).json({ message: HTTP_RESPONSE.NOT_FOUND.MESSAGE });
+        return;
+      }
+
+      res.status(HTTP_RESPONSE.OK.CODE).json({
+        message: HTTP_RESPONSE.OK.MESSAGE,
+        torrent,
+      });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-      console.error((error as Error).message);
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 
@@ -82,13 +113,16 @@ export class TorrentController {
 
     try {
       const {
-        body: { id },
+        params: { torrentIndex },
       } = req;
-      const response = await torrentService.resume(id);
-      res.status(200).json(response);
+
+      torrentService.resume(torrentIndex as unknown as number);
+
+      res.status(HTTP_RESPONSE.ACCEPTED.CODE).json({ message: HTTP_RESPONSE.ACCEPTED.MESSAGE });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-      console.error((error as Error).message);
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 
@@ -97,13 +131,16 @@ export class TorrentController {
 
     try {
       const {
-        body: { id },
+        params: { torrentIndex },
       } = req;
-      const response = await torrentService.pause(id);
-      res.status(200).json(response);
+
+      torrentService.pause(torrentIndex as unknown as number);
+
+      res.status(HTTP_RESPONSE.ACCEPTED.CODE).json({ message: HTTP_RESPONSE.ACCEPTED.MESSAGE });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-      console.error((error as Error).message);
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 
@@ -112,13 +149,17 @@ export class TorrentController {
 
     try {
       const {
-        body: { id, shouldDelete },
+        params: { torrentIndex },
+        body: { shouldDelete },
       } = req;
-      const response = await torrentService.remove(id, shouldDelete);
-      res.status(200).json(response);
+
+      torrentService.remove(torrentIndex as unknown as number, shouldDelete);
+
+      res.status(HTTP_RESPONSE.ACCEPTED.CODE).json({ message: HTTP_RESPONSE.ACCEPTED.MESSAGE });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-      console.error((error as Error).message);
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 }
