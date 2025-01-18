@@ -5,8 +5,13 @@ import { SERVICE_NAME } from '../injectable/constants';
 import { TransmissionDaemonDownError, UnrecognizedTorrentError } from './downloaders/transmission-remote/errors';
 import { TorrentNotFoundError } from './errors';
 import { TorrentService } from './torrent-service';
+import {
+  TorrentGetStatusByIndexRequest,
+  TorrentPauseRequest,
+  TorrentRemoveRequest,
+  TorrentResumeRequest,
+} from './types';
 
-// TODO: add validations for input (ajv and check if torrents exist)
 export class TorrentController {
   public async search(req: Request, res: Response): Promise<void> {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
@@ -87,7 +92,7 @@ export class TorrentController {
     try {
       const {
         params: { torrentIndex },
-      } = req as unknown as { params: { torrentIndex: number } };
+      } = req as unknown as TorrentGetStatusByIndexRequest;
 
       const torrent = torrentService.getStatusByIndex(torrentIndex);
 
@@ -112,9 +117,9 @@ export class TorrentController {
     try {
       const {
         params: { torrentIndex },
-      } = req;
+      } = req as unknown as TorrentResumeRequest;
 
-      torrentService.resume(torrentIndex as unknown as number);
+      torrentService.resume(torrentIndex);
 
       res.status(HTTP_RESPONSE.ACCEPTED.CODE).json({ message: HTTP_RESPONSE.ACCEPTED.MESSAGE });
     } catch (error) {
@@ -130,9 +135,9 @@ export class TorrentController {
     try {
       const {
         params: { torrentIndex },
-      } = req;
+      } = req as unknown as TorrentPauseRequest;
 
-      torrentService.pause(torrentIndex as unknown as number);
+      torrentService.pause(torrentIndex);
 
       res.status(HTTP_RESPONSE.ACCEPTED.CODE).json({ message: HTTP_RESPONSE.ACCEPTED.MESSAGE });
     } catch (error) {
@@ -146,12 +151,13 @@ export class TorrentController {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
+      // TODO: maybe refactor this into the validation middleware and overwrite req type with generics
       const {
         params: { torrentIndex },
         body: { shouldDelete },
-      } = req;
+      } = req as unknown as TorrentRemoveRequest;
 
-      torrentService.remove(torrentIndex as unknown as number, shouldDelete);
+      torrentService.remove(torrentIndex, shouldDelete);
 
       res.status(HTTP_RESPONSE.ACCEPTED.CODE).json({ message: HTTP_RESPONSE.ACCEPTED.MESSAGE });
     } catch (error) {

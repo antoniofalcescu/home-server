@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { HTTP_RESPONSE } from '../common/constants';
 import { Container } from '../injectable';
 import { SERVICE_NAME } from '../injectable/constants';
 import { CredentialsService } from './credentials-service';
@@ -10,9 +11,11 @@ export class CredentialsController {
     try {
       const cookies = await credentialsService.getCredentials();
       console.log(cookies);
-      res.sendStatus(200);
+      res.status(HTTP_RESPONSE.OK.CODE).json({ message: HTTP_RESPONSE.OK.MESSAGE });
     } catch {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+        message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+      });
     }
   }
 }

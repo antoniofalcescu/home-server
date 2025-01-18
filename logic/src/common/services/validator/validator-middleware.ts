@@ -3,15 +3,14 @@ import { Container } from '../../../injectable';
 import { SERVICE_NAME } from '../../../injectable/constants';
 import { HTTP_RESPONSE } from '../../constants';
 import { ValidatorError } from './errors';
-import { RequestPart } from './types';
 import { ValidatorService } from './validator-service';
 
-export function validatorMiddleware(schema: Record<string, unknown>, part: RequestPart) {
+export function validatorMiddleware(schema: Record<string, unknown>) {
   return (req: Request, res: Response, next: NextFunction) => {
     const validatorService = Container.get<ValidatorService>(SERVICE_NAME.VALIDATOR);
 
     try {
-      validatorService.validate(req, part, schema);
+      validatorService.validate(req, schema);
       next();
     } catch (error) {
       if (error instanceof ValidatorError) {

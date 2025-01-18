@@ -1,3 +1,5 @@
+import { RequestPart } from '../types';
+
 export interface Validator {
-  validate(schema: Record<string, unknown>, data: Record<string, unknown>): void;
+  validate(schema: Record<string, unknown>, data: Record<RequestPart, unknown>): void;
 }

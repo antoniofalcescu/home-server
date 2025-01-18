@@ -2,7 +2,6 @@ import { Request } from 'express';
 import { Container } from '../../../injectable';
 import { SERVICE_NAME } from '../../../injectable/constants';
 import { LoggerService } from '../../../logger';
-import { REQUEST_PARTS } from './constants';
 import { ValidatorError } from './errors';
 import { AjvValidator } from './implementations/ajv';
 import { Validator } from './interfaces';
@@ -18,9 +17,9 @@ export class ValidatorService {
     this.validator = new AjvValidator();
   }
 
-  public validate(req: Request, part: RequestPart, schema: Record<string, unknown>) {
+  public validate(req: Request, schema: Record<string, unknown>) {
     try {
-      const dataForValidation = this._parseRequestDataForValidation(req, part);
+      const dataForValidation = this._parseRequestDataForValidation(req);
       this.validator.validate(schema, dataForValidation);
     } catch (error) {
       if (error instanceof ValidatorError) {
@@ -30,7 +29,6 @@ export class ValidatorService {
         this.loggerService.error('Failed to validate request', {
           method: 'ValidatorService.validate',
           endpoint: req.originalUrl,
-          part,
           error,
         });
       }
@@ -39,15 +37,15 @@ export class ValidatorService {
     }
   }
 
-  private _parseRequestDataForValidation(req: Request, part: RequestPart): Record<string, unknown> {
-    let data = req[part];
+  private _parseRequestDataForValidation(req: Request): Record<RequestPart, unknown> {
+    const params = Object.fromEntries(
+      Object.entries(req.params).map(([key, value]) => [key, isNaN(Number(value)) ? value : Number(value)])
+    );
 
-    if (part === REQUEST_PARTS.PARAMS) {
-      data = Object.fromEntries(
-        Object.entries(data).map(([key, value]) => [key, isNaN(Number(value)) ? value : Number(value)])
-      );
-    }
-
-    return data;
+    return {
+      params,
+      body: req.body,
+      query: req.query,
+    };
   }
 }
