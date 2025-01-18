@@ -1,4 +1,4 @@
-import { Context } from '../../context/types';
+import { Context } from '../services/context/types';
 
 declare global {
   namespace Express {

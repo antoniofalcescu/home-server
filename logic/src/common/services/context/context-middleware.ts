@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { Container } from '../injectable';
-import { SERVICE_NAME } from '../injectable/constants';
+import { Container } from '../../../injectable';
+import { SERVICE_NAME } from '../../../injectable/constants';
+import { HTTP_RESPONSE } from '../../constants';
 import { ContextService } from './context-service';
 
 export async function contextMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -10,6 +11,8 @@ export async function contextMiddleware(req: Request, res: Response, next: NextF
     next();
   } catch (error) {
     console.log(`Error initializing context: ${error}`);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
+      message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
+    });
   }
 }

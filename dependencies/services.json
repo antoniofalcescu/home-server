@@ -4,12 +4,16 @@
     "path": "./dist/logic/src/logger/logger-service.js"
   },
   {
+    "name": "ValidatorService",
+    "path": "./dist/logic/src/common/services/validator/validator-service.js"
+  },
+  {
     "name": "CredentialsService",
     "path": "./dist/logic/src/credentials/credentials-service.js"
   },
   {
     "name": "ContextService",
-    "path": "./dist/logic/src/context/context-service.js"
+    "path": "./dist/logic/src/common/services/context/context-service.js"
   },
   {
     "name": "TorrentService",

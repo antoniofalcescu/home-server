@@ -1,6 +1,6 @@
-import { CredentialsService } from '../credentials/credentials-service';
-import { Container } from '../injectable';
-import { SERVICE_NAME } from '../injectable/constants';
+import { CredentialsService } from '../../../credentials/credentials-service';
+import { Container } from '../../../injectable';
+import { SERVICE_NAME } from '../../../injectable/constants';
 import { Context } from './types';
 
 export class ContextService {

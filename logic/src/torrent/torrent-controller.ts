@@ -64,7 +64,7 @@ export class TorrentController {
     }
   }
 
-  public async getStatus(_: Request, res: Response): Promise<void> {
+  public getStatus(_: Request, res: Response): void {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
@@ -81,26 +81,24 @@ export class TorrentController {
     }
   }
 
-  // TODO: add validations for input
-  public async getStatusByIndex(req: Request, res: Response): Promise<void> {
+  public getStatusByIndex(req: Request, res: Response): void {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
       const {
         params: { torrentIndex },
-      } = req;
+      } = req as unknown as { params: { torrentIndex: number } };
 
-      const torrent = torrentService.getStatusByIndex(torrentIndex as unknown as number);
+      const torrent = torrentService.getStatusByIndex(torrentIndex);
 
       if (!torrent) {
         res.status(HTTP_RESPONSE.NOT_FOUND.CODE).json({ message: HTTP_RESPONSE.NOT_FOUND.MESSAGE });
-        return;
+      } else {
+        res.status(HTTP_RESPONSE.OK.CODE).json({
+          message: HTTP_RESPONSE.OK.MESSAGE,
+          torrent,
+        });
       }
-
-      res.status(HTTP_RESPONSE.OK.CODE).json({
-        message: HTTP_RESPONSE.OK.MESSAGE,
-        torrent,
-      });
     } catch (error) {
       res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
         message: HTTP_RESPONSE.INTERNAL_SERVER_ERROR.MESSAGE,
@@ -108,7 +106,7 @@ export class TorrentController {
     }
   }
 
-  public async resume(req: Request, res: Response): Promise<void> {
+  public resume(req: Request, res: Response): void {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
@@ -126,7 +124,7 @@ export class TorrentController {
     }
   }
 
-  public async pause(req: Request, res: Response): Promise<void> {
+  public pause(req: Request, res: Response): void {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
@@ -144,7 +142,7 @@ export class TorrentController {
     }
   }
 
-  public async remove(req: Request, res: Response): Promise<void> {
+  public remove(req: Request, res: Response): void {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {

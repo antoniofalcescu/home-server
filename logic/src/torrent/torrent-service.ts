@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'node:fs';
 import { EnvHelper } from '../common/helpers';
-import { Context } from '../context/types';
+import { Context } from '../common/services/context/types';
 import { Container } from '../injectable';
 import { SERVICE_NAME } from '../injectable/constants';
 import { LoggerService } from '../logger';
@@ -114,7 +114,7 @@ export class TorrentService {
     try {
       this.torrentDownloader.remove(torrentIndex, shouldDelete);
     } catch (error) {
-      this.loggerService.warn('Failed to resume torrent', {
+      this.loggerService.warn('Failed to remove torrent', {
         torrentIndex,
         shouldDelete,
         error,
