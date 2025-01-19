@@ -3,11 +3,12 @@ import { Container } from '../../../injectable';
 import { SERVICE_NAME } from '../../../injectable/constants';
 import { HTTP_RESPONSE } from '../../constants';
 import { ContextService } from './context-service';
+import { Context } from './types';
 
 export async function contextMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   const contextService = Container.get<ContextService>(SERVICE_NAME.CONTEXT);
   try {
-    req.context = await contextService.init();
+    (req as unknown as { context: Context }).context = await contextService.init();
     next();
   } catch (error) {
     console.log(`Error initializing context: ${error}`);

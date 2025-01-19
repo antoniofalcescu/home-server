@@ -22,7 +22,7 @@ export class TorrentService {
     this.torrentDownloader = new TransmissionRemote();
   }
 
-  public async search(context: Context, torrentName: string): Promise<string[]> {
+  public async search(context: Context, torrentName: string, searchLimit: number): Promise<string[]> {
     const {
       credentials: {
         torrent: { cookies },
@@ -39,7 +39,7 @@ export class TorrentService {
       }
     );
 
-    const torrentIds = await this._extractTorrentIds(searchResponse);
+    const torrentIds = await this._extractTorrentIds(searchResponse, searchLimit);
 
     if (torrentIds.length === 0) {
       throw new TorrentNotFoundError(`Failed to find torrent for input: ${torrentName}`);
@@ -144,16 +144,15 @@ export class TorrentService {
     }
   }
 
-  private async _extractTorrentIds(response: Response): Promise<string[]> {
-    // TODO: make this easier to change - extract it either in body, in .env-helper or somewhere else
-    const TORRENT_IDS_LIMIT = 2;
+  private async _extractTorrentIds(response: Response, searchLimit: number): Promise<string[]> {
     const torrentIds = new Set<string>();
 
     const responseAsHtml = await response.text();
+    console.log(responseAsHtml);
     const $ = cheerio.load(responseAsHtml);
 
     $('.torrentrow a').each((_, element) => {
-      if (torrentIds.size === TORRENT_IDS_LIMIT) {
+      if (torrentIds.size === searchLimit) {
         return;
       }
 

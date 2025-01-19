@@ -6,10 +6,12 @@ import { TransmissionDaemonDownError, UnrecognizedTorrentError } from './downloa
 import { TorrentNotFoundError } from './errors';
 import { TorrentService } from './torrent-service';
 import {
+  TorrentDownloadRequest,
   TorrentGetStatusByIndexRequest,
   TorrentPauseRequest,
   TorrentRemoveRequest,
   TorrentResumeRequest,
+  TorrentSearchRequest,
 } from './types';
 
 export class TorrentController {
@@ -19,10 +21,10 @@ export class TorrentController {
     try {
       const {
         context,
-        body: { torrentName },
-      } = req;
+        body: { torrentName, searchLimit },
+      } = req as TorrentSearchRequest;
 
-      const torrents = await torrentService.search(context, torrentName);
+      const torrents = await torrentService.search(context, torrentName, searchLimit);
 
       res.status(HTTP_RESPONSE.OK.CODE).json({
         message: HTTP_RESPONSE.OK.MESSAGE,
@@ -47,7 +49,7 @@ export class TorrentController {
       const {
         context,
         body: { torrentId },
-      } = req;
+      } = req as TorrentDownloadRequest;
 
       await torrentService.download(context, torrentId);
 
@@ -92,7 +94,7 @@ export class TorrentController {
     try {
       const {
         params: { torrentIndex },
-      } = req as unknown as TorrentGetStatusByIndexRequest;
+      } = req as TorrentGetStatusByIndexRequest;
 
       const torrent = torrentService.getStatusByIndex(torrentIndex);
 
@@ -117,7 +119,7 @@ export class TorrentController {
     try {
       const {
         params: { torrentIndex },
-      } = req as unknown as TorrentResumeRequest;
+      } = req as TorrentResumeRequest;
 
       torrentService.resume(torrentIndex);
 
@@ -135,7 +137,7 @@ export class TorrentController {
     try {
       const {
         params: { torrentIndex },
-      } = req as unknown as TorrentPauseRequest;
+      } = req as TorrentPauseRequest;
 
       torrentService.pause(torrentIndex);
 
@@ -151,11 +153,10 @@ export class TorrentController {
     const torrentService = Container.get<TorrentService>(SERVICE_NAME.TORRENT);
 
     try {
-      // TODO: maybe refactor this into the validation middleware and overwrite req type with generics
       const {
         params: { torrentIndex },
         body: { shouldDelete },
-      } = req as unknown as TorrentRemoveRequest;
+      } = req as TorrentRemoveRequest;
 
       torrentService.remove(torrentIndex, shouldDelete);
 

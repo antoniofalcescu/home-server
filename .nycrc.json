@@ -1,0 +1,21 @@
+{
+  "all": true,
+  "cache": true,
+  "check-coverage": true,
+  "statements": 90,
+  "branches": 80,
+  "functions": 90,
+  "lines": 90,
+  "include": [
+    "logic/src/**/*.ts"
+  ],
+  "report-dir": "./coverage",
+  "reporter": [
+    "text-summary",
+    "lcov",
+    "html"
+  ],
+  "require": [
+    "ts-node/register"
+  ]
+}
