@@ -21,10 +21,10 @@ export class TorrentController {
     try {
       const {
         context,
-        body: { torrentName, searchLimit },
+        body: { name, searchLimit },
       } = req as TorrentSearchRequest;
 
-      const torrents = await torrentService.search(context, torrentName, searchLimit);
+      const torrents = await torrentService.search(context, name, searchLimit);
 
       res.status(HTTP_RESPONSE.OK.CODE).json({
         message: HTTP_RESPONSE.OK.MESSAGE,
@@ -48,10 +48,10 @@ export class TorrentController {
     try {
       const {
         context,
-        body: { torrentId },
+        body: { id },
       } = req as TorrentDownloadRequest;
 
-      await torrentService.download(context, torrentId);
+      await torrentService.download(context, id);
 
       res.status(HTTP_RESPONSE.CREATED.CODE).json({ message: HTTP_RESPONSE.CREATED.MESSAGE });
     } catch (error) {

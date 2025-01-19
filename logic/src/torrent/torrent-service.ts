@@ -35,6 +35,8 @@ export class TorrentService {
         credentials: 'include',
         headers: {
           Cookie: cookies,
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
         },
       }
     );
@@ -63,6 +65,8 @@ export class TorrentService {
         credentials: 'include',
         headers: {
           Cookie: cookies,
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
         },
       });
 
@@ -148,7 +152,6 @@ export class TorrentService {
     const torrentIds = new Set<string>();
 
     const responseAsHtml = await response.text();
-    console.log(responseAsHtml);
     const $ = cheerio.load(responseAsHtml);
 
     $('.torrentrow a').each((_, element) => {
