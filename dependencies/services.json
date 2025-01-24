@@ -1,7 +1,7 @@
 [
   {
     "name": "LoggerService",
-    "path": "./dist/logic/src/logger/logger-service.js"
+    "path": "./dist/logic/src/common/services/logger/logger-service.js"
   },
   {
     "name": "ValidatorService",
@@ -9,7 +9,7 @@
   },
   {
     "name": "CredentialsService",
-    "path": "./dist/logic/src/credentials/credentials-service.js"
+    "path": "./dist/logic/src/services/credentials/credentials-service.js"
   },
   {
     "name": "ContextService",
@@ -17,6 +17,6 @@
   },
   {
     "name": "TorrentService",
-    "path": "./dist/logic/src/torrent/torrent-service.js"
+    "path": "./dist/logic/src/services/torrent/torrent-service.js"
   }
 ]

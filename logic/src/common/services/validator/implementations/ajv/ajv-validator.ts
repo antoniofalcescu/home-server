@@ -1,4 +1,4 @@
-import Ajv, { ValidationError } from 'ajv';
+import Ajv from 'ajv';
 import { ValidatorError } from '../../errors';
 import { Validator } from '../../interfaces';
 import { RequestPart } from '../../types';
@@ -15,8 +15,7 @@ export class AjvValidator implements Validator {
     const isValid = validateSchema(data);
 
     if (!isValid) {
-      const errors = (validateSchema.errors ?? []) as unknown as ValidationError[];
-      throw new ValidatorError<ValidationError>(AjvValidator.name, errors);
+      throw new ValidatorError(AjvValidator.name, { errors: validateSchema.errors });
     }
   }
 }

@@ -1,5 +1,5 @@
 import express from 'express';
-import { CredentialsController } from '../../credentials';
+import { CredentialsController } from '../../services/credentials';
 
 const credentialsRouter = express.Router();
 

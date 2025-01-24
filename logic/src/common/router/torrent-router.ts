@@ -1,5 +1,5 @@
 import express from 'express';
-import { TorrentController } from '../../torrent';
+import { TorrentController } from '../../services/torrent';
 import { contextMiddleware } from '../services/context';
 import { validatorMiddleware } from '../services/validator';
 import {

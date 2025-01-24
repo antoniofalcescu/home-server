@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { Container } from '../../../injectable';
 import { SERVICE_NAME } from '../../../injectable/constants';
-import { LoggerService } from '../../../logger';
+import { LoggerService } from '../logger';
 import { ValidatorError } from './errors';
 import { AjvValidator } from './implementations/ajv';
 import { Validator } from './interfaces';
