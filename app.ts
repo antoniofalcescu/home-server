@@ -18,9 +18,9 @@ app.listen(port, async () => {
   await TorrentSessionManager.start();
   console.log(`Example app listening on port ${port}`);
 
-  process.on('SIGINT', async () => {
+  // TODO: investigate how exactly and if SIGINT supports async ops
+  process.on('SIGINT', () => {
     console.log('Shutting down...');
-    await TorrentSessionManager.stop();
-    process.exit(0);
+    TorrentSessionManager.stop().finally(() => process.exit(0));
   });
 });

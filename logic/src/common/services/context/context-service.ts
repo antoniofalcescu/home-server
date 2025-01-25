@@ -13,7 +13,7 @@ export class ContextService {
   public async init(): Promise<Context> {
     const session = await this.sessionService.getSession();
     return {
-      session: session,
+      session,
     };
   }
 }

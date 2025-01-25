@@ -32,11 +32,9 @@ export class TorrentSessionManager {
     await TorrentSessionManager._refreshSession();
 
     if (TorrentSessionManager.intervalId) {
-      console.log('TorrentSessionManager interval already running');
+      console.info('TorrentSessionManager interval already running');
       return;
     }
-
-    console.log('TorrentSessionManager started interval');
 
     TorrentSessionManager.intervalId = setInterval(async () => {
       await TorrentSessionManager._refreshSession();
@@ -44,7 +42,8 @@ export class TorrentSessionManager {
   }
 
   public static async stop(): Promise<void> {
-    console.log('Called TorrentSessionManager.stop');
+    console.info('TorrentSessionManager is stopping...');
+
     if (TorrentSessionManager.intervalId) {
       clearInterval(TorrentSessionManager.intervalId);
       TorrentSessionManager.intervalId = null;
@@ -52,15 +51,14 @@ export class TorrentSessionManager {
       if (TorrentSessionManager.instance) {
         await TorrentSessionManager.instance._destroyInstance();
       }
-
-      console.log('TorrentSessionManager has stopped.');
     }
+
+    console.info('TorrentSessionManager stopped');
   }
 
   private async _destroyInstance(): Promise<void> {
-    await this.browser.close();
-
     TorrentSessionManager.instance = null;
+    return this.browser.close();
   }
 
   private static async _refreshSession(): Promise<void> {
@@ -71,6 +69,8 @@ export class TorrentSessionManager {
     const browser = await playwright.chromium.launch({ headless: false });
     const page = await browser.newPage();
     TorrentSessionManager.instance = new TorrentSessionManager(browser, page);
+
+    TorrentSessionManager.instance.loggerService.info('TorrentSessionManager : Refreshing torrent session...');
 
     await TorrentSessionManager.instance._getAndStoreSession();
   }
@@ -86,9 +86,10 @@ export class TorrentSessionManager {
 
       const cookies = await this.page.context().cookies();
       const serializedCookies = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join(';');
+      const torrentSession = { cookies: serializedCookies };
 
-      await this.sessionService.setSession(serializedCookies, Date.now() + HOUR_IN_MILLISECONDS);
-      console.log('TorrentSessionManager refreshed session');
+      await this.sessionService.setSession({ torrent: torrentSession }, Date.now() + HOUR_IN_MILLISECONDS);
+      this.loggerService.info('TorrentSessionManager : Stored torrent session successfully');
     } catch (error) {
       this.loggerService.error((error as Error).message, { error });
       throw error;

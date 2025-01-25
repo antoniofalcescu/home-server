@@ -4,13 +4,13 @@ import { Container } from '../../injectable';
 import { SERVICE_NAME } from '../../injectable/constants';
 import { SessionService } from './session-service';
 
+// TODO: probably remove this - no need to expose it to client
 export class SessionController {
   public async getSession(_: Request, res: Response): Promise<void> {
     const sessionService = Container.get<SessionService>(SERVICE_NAME.SESSION);
 
     try {
-      const cookies = await sessionService.getSession();
-      console.log(cookies);
+      await sessionService.getSession();
       res.status(HTTP_RESPONSE.OK.CODE).json({ message: HTTP_RESPONSE.OK.MESSAGE });
     } catch {
       res.status(HTTP_RESPONSE.INTERNAL_SERVER_ERROR.CODE).json({
