@@ -1,19 +1,19 @@
 import { Container } from '../../../injectable';
 import { SERVICE_NAME } from '../../../injectable/constants';
-import { CredentialsService } from '../../../services/credentials/credentials-service';
+import { SessionService } from '../../../services/session/session-service';
 import { Context } from './types';
 
 export class ContextService {
-  private readonly credentialsService: CredentialsService;
+  private readonly sessionService: SessionService;
 
   constructor() {
-    this.credentialsService = Container.get<CredentialsService>(SERVICE_NAME.CREDENTIALS);
+    this.sessionService = Container.get<SessionService>(SERVICE_NAME.SESSION);
   }
 
   public async init(): Promise<Context> {
-    const credentials = await this.credentialsService.getCredentials();
+    const session = await this.sessionService.getSession();
     return {
-      credentials,
+      session: session,
     };
   }
 }

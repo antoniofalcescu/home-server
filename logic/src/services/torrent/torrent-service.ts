@@ -24,7 +24,7 @@ export class TorrentService {
 
   public async search(context: Context, torrentName: string, searchLimit: number): Promise<string[]> {
     const {
-      credentials: {
+      session: {
         torrent: { cookies },
       },
     } = context;
@@ -56,7 +56,7 @@ export class TorrentService {
 
     if (!fs.existsSync(torrentPath)) {
       const {
-        credentials: {
+        session: {
           torrent: { cookies },
         },
       } = context;

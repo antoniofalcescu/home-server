@@ -8,8 +8,8 @@
     "path": "./dist/logic/src/common/services/validator/validator-service.js"
   },
   {
-    "name": "CredentialsService",
-    "path": "./dist/logic/src/services/credentials/credentials-service.js"
+    "name": "SessionService",
+    "path": "./dist/logic/src/services/session/session-service.js"
   },
   {
     "name": "ContextService",

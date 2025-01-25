@@ -1,2 +1,2 @@
-export * from './credentials-router';
+export * from './session-router';
 export * from './torrent-router';

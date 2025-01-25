@@ -23,8 +23,12 @@ export class ValidatorService {
       this.validator.validate(schema, dataForValidation);
     } catch (error) {
       if (error instanceof ValidatorError) {
-        // TODO: alert counter
-        // TODO: maybe log after implementing rate limiter
+        this.loggerService.error('Failed to validate request', {
+          class: ValidatorService.name,
+          method: this.validate.name,
+          endpoint: req.originalUrl,
+          error,
+        });
       } else {
         this.loggerService.error('Failed to validate request', {
           method: 'ValidatorService.validate',

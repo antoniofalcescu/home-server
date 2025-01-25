@@ -1,5 +1,5 @@
-import { Credentials } from '../../../../services/credentials/types';
+import { Session } from '../../../../services/session/types';
 
 export type Context = {
-  credentials: Credentials;
+  session: Session;
 };
