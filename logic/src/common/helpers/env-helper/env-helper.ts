@@ -4,8 +4,6 @@ import { Env } from './types';
 
 export class EnvHelper {
   public static verify() {
-    // TODO: at the moment ENV_KEYS is manually populated
-    //  ideally we should create it dynamically based on the Env type
     for (const key of ENV_KEYS) {
       if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
         throw new EnvError(`Missing key ${key} in .env`);

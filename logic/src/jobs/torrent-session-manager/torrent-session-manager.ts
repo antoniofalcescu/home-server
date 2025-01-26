@@ -4,8 +4,8 @@ import { EnvHelper } from '../../common/helpers';
 import { LoggerService } from '../../common/services/logger';
 import { Container } from '../../injectable';
 import { SERVICE_NAME } from '../../injectable/constants';
+import { SessionService } from '../../services/session';
 import { TORRENT_PROVIDER_FIELD } from '../../services/session/constants';
-import { SessionService } from '../../services/session/session-service';
 
 export class TorrentSessionManager {
   private static instance: TorrentSessionManager | null = null;
@@ -66,7 +66,10 @@ export class TorrentSessionManager {
       await TorrentSessionManager.instance._destroyInstance();
     }
 
-    const browser = await playwright.chromium.launch({ headless: false });
+    const browser = await playwright.chromium.launch({
+      headless: false,
+      args: ['--no-sandbox', '--disable-dev-shm-usage'],
+    });
     const page = await browser.newPage();
     TorrentSessionManager.instance = new TorrentSessionManager(browser, page);
 

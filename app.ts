@@ -1,6 +1,6 @@
 import express from 'express';
 import { EnvHelper } from './logic/src/common/helpers';
-import { sessionRouter, torrentRouter } from './logic/src/common/router';
+import { torrentRouter } from './logic/src/common/router';
 import { Container } from './logic/src/injectable';
 import { TorrentSessionManager } from './logic/src/jobs/torrent-session-manager';
 
@@ -9,7 +9,6 @@ const port = 3000;
 
 app.use(express.json());
 
-app.use(sessionRouter);
 app.use(torrentRouter);
 
 app.listen(port, async () => {

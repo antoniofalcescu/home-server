@@ -1,6 +1,3 @@
-export type Env = {
-  TORRENT_PROVIDER_BASE_URL: string;
-  TORRENT_PROVIDER_USERNAME: string;
-  TORRENT_PROVIDER_PASSWORD: string;
-  TORRENT_DOWNLOAD_PATH: string;
-};
+import { ENV_KEYS } from '../constants';
+
+export type Env = Record<(typeof ENV_KEYS)[number], string>;
