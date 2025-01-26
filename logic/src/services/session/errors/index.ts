@@ -1,1 +1,1 @@
-export * from './dal-error';
+export * from './session-dal-error';

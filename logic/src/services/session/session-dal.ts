@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 import { Storage } from '../../common/storage';
-import { DalError } from './errors';
+import { SessionDalError } from './errors';
 import { Session } from './types';
 
 export class SessionDal {
@@ -18,7 +18,7 @@ export class SessionDal {
 
       await redisMulti.exec();
     } catch (error) {
-      throw new DalError((error as Error).message);
+      throw new SessionDalError((error as Error).message);
     }
   }
 
@@ -27,7 +27,7 @@ export class SessionDal {
       const serializedSession = await this._redis.hgetall(this._sessionKey);
       return this._deserialize(serializedSession);
     } catch (error) {
-      throw new DalError((error as Error).message);
+      throw new SessionDalError((error as Error).message);
     }
   }
 

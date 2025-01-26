@@ -6,4 +6,9 @@ export const ENV_KEYS = [
   'ARGON2_MEMORY_COST',
   'ARGON2_TIME_COST',
   'ARGON2_SECRET',
+  'PG_USER',
+  'PG_PASSWORD',
+  'PG_HOST',
+  'PG_PORT',
+  'PG_DATABASE',
 ];
