@@ -15,6 +15,14 @@ export const HTTP_RESPONSE = {
     CODE: 400,
     MESSAGE: 'Bad Request',
   },
+  UNAUTHORIZED: {
+    CODE: 401,
+    MESSAGE: 'Unauthorized',
+  },
+  FORBIDDEN: {
+    CODE: 403,
+    MESSAGE: 'Forbidden',
+  },
   NOT_FOUND: {
     CODE: 404,
     MESSAGE: 'Not Found',

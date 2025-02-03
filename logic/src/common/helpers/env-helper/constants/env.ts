@@ -11,4 +11,5 @@ export const ENV_KEYS = [
   'PG_HOST',
   'PG_PORT',
   'PG_DATABASE',
+  'JWT_SECRET',
 ];

@@ -18,7 +18,7 @@ export class Argon2id implements PasswordHashingAlgorithm {
   }
 
   public async hash(password: string): Promise<string> {
-    return await hash(password.normalize(NORMALIZATION_FORM), {
+    return hash(password.normalize(NORMALIZATION_FORM), {
       memoryCost: this.memoryCost,
       timeCost: this.timeCost,
       secret: this.secret,
@@ -26,7 +26,7 @@ export class Argon2id implements PasswordHashingAlgorithm {
   }
 
   public async verify(hash: string, password: string): Promise<boolean> {
-    return await verify(hash, password.normalize(NORMALIZATION_FORM), {
+    return verify(hash, password.normalize(NORMALIZATION_FORM), {
       memoryCost: this.memoryCost,
       timeCost: this.timeCost,
       secret: this.secret,

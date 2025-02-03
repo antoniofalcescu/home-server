@@ -1,1 +1,1 @@
-export * from './authentication-dal-error';
+export * from './invalid-password-error';

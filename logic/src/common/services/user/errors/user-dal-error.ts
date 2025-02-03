@@ -1,10 +1,10 @@
-export class AuthenticationDalError extends Error {
+export class UserDalError extends Error {
   public readonly metadata: Record<string, unknown>;
 
   constructor(message: string, metadata: Record<string, unknown> = {}) {
     super(message);
 
-    this.name = AuthenticationDalError.name;
+    this.name = UserDalError.name;
     this.metadata = metadata;
   }
 }

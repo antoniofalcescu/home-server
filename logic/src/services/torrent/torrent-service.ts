@@ -44,7 +44,7 @@ export class TorrentService {
     const torrentIds = await this._extractTorrentIds(searchResponse, searchLimit);
 
     if (torrentIds.length === 0) {
-      throw new TorrentNotFoundError(`Failed to find torrent for input: ${torrentName}`);
+      throw new TorrentNotFoundError('Failed to find torrent', { input: torrentName });
     }
 
     return torrentIds;

@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticateToken } from '../../services/authentication';
 import { TorrentController } from '../../services/torrent';
 import { contextMiddleware } from '../services/context';
 import { validatorMiddleware } from '../services/validator';
@@ -15,10 +16,11 @@ const torrentRouter = express.Router();
 
 const torrentController = new TorrentController();
 
-// TODO: investigate why it's returning login html on search even though login seems to work
+// TODO: IMPLEMENT VALIDATION FOR AUTHENTICATION AND ALSO CHECK IF BEARER IS PASSED
 torrentRouter.post(
   '/api/v1/torrent/search',
   validatorMiddleware(TORRENT_SEARCH_SCHEMA),
+  authenticateToken,
   contextMiddleware,
   torrentController.search
 );

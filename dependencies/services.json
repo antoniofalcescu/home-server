@@ -8,6 +8,14 @@
     "path": "./dist/logic/src/common/services/validator/validator-service.js"
   },
   {
+    "name": "UserService",
+    "path": "./dist/logic/src/common/services/user/user-service.js"
+  },
+  {
+    "name": "AuthenticationService",
+    "path": "./dist/logic/src/services/authentication/authentication-service.js"
+  },
+  {
     "name": "SessionService",
     "path": "./dist/logic/src/services/session/session-service.js"
   },
