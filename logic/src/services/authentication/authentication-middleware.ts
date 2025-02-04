@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { HTTP_RESPONSE } from '../../common/constants';
 import { EnvHelper } from '../../common/helpers';
 
-export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+export function authenticateMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

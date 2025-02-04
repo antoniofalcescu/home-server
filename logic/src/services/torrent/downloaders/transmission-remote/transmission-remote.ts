@@ -14,6 +14,8 @@ export class TransmissionRemote implements ITorrentDownloader {
     this.torrentDataFromBufferBuilder = new TorrentDataFromBufferBuilder();
   }
 
+  // TODO: check if there is any way to get notifier when download finished
+  //  implement a script to be ran after download finished to rename, move, grant permission correctly to the downloaded file
   public start(torrentPath: string): void {
     try {
       const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
