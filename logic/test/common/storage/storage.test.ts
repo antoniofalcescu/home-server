@@ -13,4 +13,10 @@ describe('Storage', () => {
       expect(Storage.getInstance().getRedis()).to.exist;
     });
   });
+
+  describe('getPostgres', () => {
+    it('should return postgres', () => {
+      expect(Storage.getInstance().getPostgres()).to.exist;
+    });
+  });
 });

@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
+    "@faker-js/faker": "^9.5.0",
     "@types/ajv": "^0.0.5",
     "@types/chai": "^5.0.1",
     "@types/chai-as-promised": "^8.0.1",
