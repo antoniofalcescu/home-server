@@ -44,10 +44,31 @@ jobs:
 
       - name: Check Coverage
         run: |
-          COVERAGE=$(npx nyc report --reporter=text-summary | grep 'Statements' | awk '{print $4}' | tr -d '%')
+          STATEMENTS_COVERAGE=$(npx nyc report --reporter=text-summary | grep 'Statements' | awk '{print $4}' | tr -d '%')
+          LINES_COVERAGE=$(npx nyc report --reporter=text-summary | grep 'Lines' | awk '{print $4}' | tr -d '%')
+          BRANCHES_COVERAGE=$(npx nyc report --reporter=text-summary | grep 'Branches' | awk '{print $4}' | tr -d '%')
+          FUNCTIONS_COVERAGE=$(npx nyc report --reporter=text-summary | grep 'Functions' | awk '{print $4}' | tr -d '%')
+
           THRESHOLD=100
-          echo "Coverage: $COVERAGE%, Required: $THRESHOLD%"
-          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
-            echo "❌ Coverage is too low! Failing..."
+
+          echo "Statements Coverage: $STATEMENTS_COVERAGE%, Required: $THRESHOLD%"
+          echo "Lines Coverage: $LINES_COVERAGE%, Required: $THRESHOLD%"
+          echo "Branches Coverage: $BRANCHES_COVERAGE%, Required: $THRESHOLD%"
+          echo "Functions Coverage: $FUNCTIONS_COVERAGE%, Required: $THRESHOLD%"
+
+          if (( $(echo "$STATEMENTS_COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "❌ Statements coverage is too low! Failing..."
+            exit 1
+          fi
+          if (( $(echo "$LINES_COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "❌ Lines coverage is too low! Failing..."
+            exit 1
+          fi
+          if (( $(echo "$BRANCHES_COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "❌ Branches coverage is too low! Failing..."
+            exit 1
+          fi
+          if (( $(echo "$FUNCTIONS_COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "❌ Functions coverage is too low! Failing..."
             exit 1
           fi
