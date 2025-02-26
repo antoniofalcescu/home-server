@@ -23,31 +23,37 @@ export class TorrentService {
   }
 
   public async search(context: Context, torrentName: string, searchLimit: number): Promise<string[]> {
-    const {
-      session: {
-        torrent: { cookies },
-      },
-    } = context;
-
-    const searchResponse = await fetch(
-      `${SEARCH_ENDPOINT}?search=${encodeURIComponent(torrentName)}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`,
-      {
-        credentials: 'include',
-        headers: {
-          Cookie: cookies,
-          'user-agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+    try {
+      const {
+        session: {
+          torrent: { cookies },
         },
+      } = context;
+
+      const searchResponse = await fetch(
+        `${SEARCH_ENDPOINT}?search=${encodeURIComponent(torrentName)}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`,
+        {
+          credentials: 'include',
+          headers: {
+            Cookie: cookies,
+            'user-agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+          },
+        }
+      );
+
+      const torrentIds = await this._extractTorrentIds(searchResponse, searchLimit);
+
+      // TODO: think how to handle throw not in try
+      if (!torrentIds.length) {
+        throw new TorrentNotFoundError('Failed to find torrent', { input: torrentName });
       }
-    );
 
-    const torrentIds = await this._extractTorrentIds(searchResponse, searchLimit);
-
-    if (torrentIds.length === 0) {
-      throw new TorrentNotFoundError('Failed to find torrent', { input: torrentName });
+      return torrentIds;
+    } catch (error) {
+      this.loggerService.warn('Failed to search torrent', { context, error });
+      throw error;
     }
-
-    return torrentIds;
   }
 
   public async download(context: Context, torrentId: string): Promise<void> {

@@ -1,4 +1,4 @@
-import playwright, { Browser, Page } from 'playwright';
+import playwright, { Browser, BrowserContext, Cookie, Page } from 'playwright';
 import { HOUR_IN_MILLISECONDS } from '../../common/constants';
 import { EnvHelper } from '../../common/helpers';
 import { LoggerService } from '../../common/services/logger';
@@ -6,6 +6,7 @@ import { Container } from '../../injectable';
 import { SERVICE_NAME } from '../../injectable/constants';
 import { SessionService } from '../../services/session';
 import { TORRENT_PROVIDER_FIELD } from '../../services/session/constants';
+import { COOKIES, MISSING_COOKIES_LENGTH } from './constants';
 
 export class TorrentSessionManager {
   private static instance: TorrentSessionManager | null = null;
@@ -87,7 +88,8 @@ export class TorrentSessionManager {
       await this.page.getByPlaceholder(TORRENT_PROVIDER_FIELD.PASSWORD).fill(TORRENT_PROVIDER_PASSWORD);
       await this.page.getByRole(TORRENT_PROVIDER_FIELD.BUTTON).click();
 
-      const cookies = await this.page.context().cookies();
+      const pageContext = this.page.context();
+      const cookies = await this._getCookies(pageContext);
       const serializedCookies = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join(';');
       const torrentSession = { cookies: serializedCookies };
 
@@ -97,5 +99,28 @@ export class TorrentSessionManager {
       this.loggerService.error((error as Error).message, { error });
       throw error;
     }
+  }
+
+  private async _getCookies(context: BrowserContext): Promise<Cookie[]> {
+    const { TORRENT_PROVIDER_COOKIES_UID, TORRENT_PROVIDER_COOKIES_PASS } = EnvHelper.get();
+
+    const cookies = await context.cookies();
+
+    if (cookies.length === MISSING_COOKIES_LENGTH) {
+      const otherCookies = [
+        {
+          name: COOKIES.UID,
+          value: TORRENT_PROVIDER_COOKIES_UID,
+        },
+        {
+          name: COOKIES.PASS,
+          value: TORRENT_PROVIDER_COOKIES_PASS,
+        },
+      ] as Cookie[];
+
+      cookies.push(...otherCookies);
+    }
+
+    return cookies;
   }
 }
