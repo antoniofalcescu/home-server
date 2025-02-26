@@ -18,7 +18,7 @@ app.use(torrentRouter);
 app.listen(port, async () => {
   EnvHelper.verify();
   await Container.init();
-  // await TorrentSessionManager.start();
+  await TorrentSessionManager.start();
   console.log(`Example app listening on port ${port}`);
 
   // TODO: investigate how exactly and if SIGINT supports async ops
