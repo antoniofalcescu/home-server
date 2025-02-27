@@ -42,16 +42,9 @@ export class TorrentService {
         }
       );
 
-      const torrentIds = await this._extractTorrentIds(searchResponse, searchLimit);
-
-      // TODO: think how to handle throw not in try
-      if (!torrentIds.length) {
-        throw new TorrentNotFoundError('Failed to find torrent', { input: torrentName });
-      }
-
-      return torrentIds;
+      return this._extractTorrentIds(searchResponse, searchLimit);
     } catch (error) {
-      this.loggerService.warn('Failed to search torrent', { context, error });
+      this.loggerService.error('Failed to search torrent', { context, error, torrentName, searchLimit });
       throw error;
     }
   }
@@ -155,10 +148,10 @@ export class TorrentService {
   }
 
   private async _extractTorrentIds(response: Response, searchLimit: number): Promise<string[]> {
-    const torrentIds = new Set<string>();
-
     const responseAsHtml = await response.text();
     const $ = cheerio.load(responseAsHtml);
+
+    const torrentIds = new Set<string>();
 
     $('.torrentrow a').each((_, element) => {
       if (torrentIds.size === searchLimit) {
@@ -173,6 +166,10 @@ export class TorrentService {
         }
       }
     });
+
+    if (!torrentIds.size) {
+      throw new TorrentNotFoundError('Failed to find torrent');
+    }
 
     return Array.from(torrentIds);
   }
