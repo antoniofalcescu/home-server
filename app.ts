@@ -12,6 +12,9 @@ app.use(express.json());
 app.use(authenticationRouter);
 app.use(torrentRouter);
 
+// TODO: MAKE A LIST WITH THE PI CMDS I NEED TO MANUALLY RUN EVERYTIME AND MAKE A SCRIPT THAT AUTOMATES THEM
+// MAKE A REQUEST TO RUN THIS SCRIPT MANUALLY AT FIRST FOR A CERTAIN FILE
+
 // TODO: check how ffmpeg works to convert mkv to phone for direct play on jellyfin
 
 // TODO: TailScale for Jellyfin (can't stream with CF tunnels) and CF Tunnels for home-server site
