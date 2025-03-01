@@ -26,6 +26,7 @@ export class CmdHelper {
 
     const command = this.commands.join(' && ');
     try {
+      // TODO: treat output
       await execPromise(command);
       // return { stdout, stderr };
     } finally {
