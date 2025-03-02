@@ -1,13 +1,18 @@
-import { CmdHelper } from '../../../../../common/helpers/cmd-helper';
+import { CommandBuilder } from '../../../../../common/helpers/command-helper';
 import { MediaHandler } from '../../interfaces';
+import { MediaHandlerType } from '../../types';
 
 export class JellyfinMediaHandler implements MediaHandler {
-  private readonly cmdHelper: CmdHelper;
+  private readonly type: MediaHandlerType;
 
-  constructor() {
-    this.cmdHelper = new CmdHelper();
+  private readonly commandBuilder: CommandBuilder;
+
+  constructor(type: MediaHandlerType) {
+    this.type = type;
+    this.commandBuilder = new CommandBuilder();
   }
 
-  // TODO: here I can use instantiated cmdHelper to create request
-  public async transferMedia(): Promise<void> {}
+  public async afterDownload(): Promise<void> {
+    // const command = this.commandBuilder.mv();
+  }
 }

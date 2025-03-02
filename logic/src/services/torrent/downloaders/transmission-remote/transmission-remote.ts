@@ -18,8 +18,8 @@ export class TransmissionRemote implements ITorrentDownloader {
   //  implement a script to be ran after download finished to rename, move, grant permission correctly to the downloaded file
   public start(torrentPath: string): void {
     try {
-      const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
-      const DOWNLOAD_TORRENT_CMD = `transmission-remote --download-dir ${TORRENT_DOWNLOAD_PATH} -a ${torrentPath}`;
+      const { ABSOLUTE_PATH_DOWNLOADS } = EnvHelper.get();
+      const DOWNLOAD_TORRENT_CMD = `transmission-remote --download-dir ${ABSOLUTE_PATH_DOWNLOADS} -a ${torrentPath}`;
       execSync(DOWNLOAD_TORRENT_CMD);
     } catch (error) {
       if (error instanceof Error) {
