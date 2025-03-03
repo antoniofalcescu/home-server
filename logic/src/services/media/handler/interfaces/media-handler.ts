@@ -1,3 +1,5 @@
+import { Media } from '../types';
+
 export interface MediaHandler {
-  afterDownload(): Promise<void>;
+  onDownloadFinished(media: Media): Promise<void>;
 }

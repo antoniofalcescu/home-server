@@ -5,7 +5,7 @@ import { MediaHandler } from './interfaces';
 import { MediaHandlerType } from './types';
 
 export class MediaHandlerFactory {
-  private readonly handlers: Record<MediaHandlerType, new (type: MediaHandlerType) => MediaHandler>;
+  private readonly handlers: Record<MediaHandlerType, new () => MediaHandler>;
 
   constructor() {
     this.handlers = {
@@ -20,7 +20,7 @@ export class MediaHandlerFactory {
     }
 
     const HandlerClass = this.handlers[type];
-    return new HandlerClass(type);
+    return new HandlerClass();
   }
 
   private _isMediaHandlerType(type: string): type is MediaHandlerType {

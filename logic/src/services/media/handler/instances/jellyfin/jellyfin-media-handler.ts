@@ -1,18 +1,24 @@
+import { EnvHelper } from '../../../../../common/helpers';
 import { CommandBuilder } from '../../../../../common/helpers/command-helper';
 import { MediaHandler } from '../../interfaces';
-import { MediaHandlerType } from '../../types';
+import { Media } from '../../types';
 
 export class JellyfinMediaHandler implements MediaHandler {
-  private readonly type: MediaHandlerType;
-
   private readonly commandBuilder: CommandBuilder;
 
-  constructor(type: MediaHandlerType) {
-    this.type = type;
+  constructor() {
     this.commandBuilder = new CommandBuilder();
   }
 
-  public async afterDownload(): Promise<void> {
-    // const command = this.commandBuilder.mv();
+  public async onDownloadFinished(media: Media): Promise<void> {
+    const { ABSOLUTE_PATH_DOWNLOADS, ABSOLUTE_PATH_JELLYFIN } = EnvHelper.get();
+    const { name, newName } = media;
+
+    // TODO: check 5 different movies and tv shows titles and see how maybe we can dynamically rename them (with season included for tv shows)
+    const sourcePath = `${ABSOLUTE_PATH_DOWNLOADS}/${name}`;
+    const targetPath = `${ABSOLUTE_PATH_JELLYFIN}/${newName ?? name}`;
+
+    const command = this.commandBuilder.mv(sourcePath, targetPath).build();
+    await command.execute();
   }
 }
