@@ -2,6 +2,7 @@ import { EnvHelper } from '../../../../../common/helpers';
 import { CommandBuilder } from '../../../../../common/helpers/command-helper';
 import { MediaHandler } from '../../interfaces';
 import { Media } from '../../types';
+import { ON_DOWNLOAD_FINISHED } from './constants';
 
 export class JellyfinMediaHandler implements MediaHandler {
   private readonly commandBuilder: CommandBuilder;
@@ -16,7 +17,11 @@ export class JellyfinMediaHandler implements MediaHandler {
 
     const sourcePath = `${ABSOLUTE_PATH_DOWNLOADS}/${name}`;
     const targetPath = `${ABSOLUTE_PATH_JELLYFIN}/${newName ?? name}`;
-    const command = this.commandBuilder.mv(sourcePath, targetPath).build();
+    const command = this.commandBuilder
+      .mv(sourcePath, targetPath)
+      .chmod(ON_DOWNLOAD_FINISHED.FLAGS, ON_DOWNLOAD_FINISHED.ACL, targetPath)
+      .build();
+    console.log(command);
     await command.execute();
   }
 }

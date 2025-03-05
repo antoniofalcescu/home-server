@@ -1,4 +1,5 @@
 import { Command } from './command';
+import { ChmodFlags } from './types';
 
 export class CommandBuilder {
   private commands: string[];
@@ -20,8 +21,9 @@ export class CommandBuilder {
     return this._addCommand(`mv "${source}" "${target}"`);
   }
 
-  public chmod(permissions: string, path: string): this {
-    return this._addCommand(`chmod ${permissions} "${path}"`);
+  public chmod(flags: ChmodFlags[], acl: string, path: string): this {
+    const commandFlags = flags.join(' ');
+    return this._addCommand(`chmod ${commandFlags} "${acl}" "${path}"`);
   }
 
   private _addCommand(command: string): this {

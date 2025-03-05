@@ -18,6 +18,6 @@ export class MediaService {
 
   public async onDownloadFinished(name: string, type: string): Promise<void> {
     const mediaHandler = this.mediaHandlerFactory.getHandler(type);
-    await mediaHandler.onDownloadFinished({ name, type: type as MediaHandlerType });
+    return mediaHandler.onDownloadFinished({ name, type: type as MediaHandlerType });
   }
 }
