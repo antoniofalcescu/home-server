@@ -11,6 +11,7 @@ export class JellyfinMediaHandler implements MediaHandler {
     this.commandBuilder = new CommandBuilder();
   }
 
+  // TODO: test this and see how it works on a real folder
   public async onDownloadFinished(media: Media): Promise<void> {
     const { ABSOLUTE_PATH_DOWNLOADS, ABSOLUTE_PATH_JELLYFIN } = EnvHelper.get();
     const { name, newName } = media;

@@ -1,6 +1,6 @@
 import express from 'express';
 import { EnvHelper } from './logic/src/common/helpers';
-import { authenticationRouter, torrentRouter } from './logic/src/common/router';
+import { authenticationRouter, mediaRouter, torrentRouter } from './logic/src/common/router';
 import { Container } from './logic/src/injectable';
 import { TorrentSessionManager } from './logic/src/jobs/torrent-session-manager';
 
@@ -11,11 +11,7 @@ app.use(express.json());
 
 app.use(authenticationRouter);
 app.use(torrentRouter);
-
-// TODO: MAKE A LIST WITH THE PI CMDS I NEED TO MANUALLY RUN EVERYTIME AND MAKE A SCRIPT THAT AUTOMATES THEM
-// MAKE A REQUEST TO RUN THIS SCRIPT MANUALLY AT FIRST FOR A CERTAIN FILE
-
-// TODO: check how ffmpeg works to convert mkv to phone for direct play on jellyfin
+app.use(mediaRouter);
 
 // TODO: TailScale for Jellyfin (can't stream with CF tunnels) and CF Tunnels for home-server site
 // TODO: check what media video/audio is supported on iphone/android and how to maybe download/convert existing ones after downloading them once
