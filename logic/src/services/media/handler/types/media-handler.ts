@@ -5,5 +5,4 @@ export type MediaHandlerType = (typeof MEDIA_HANDLER_TYPE)[keyof typeof MEDIA_HA
 export type Media = {
   name: string;
   type: MediaHandlerType;
-  newName?: string;
 };
