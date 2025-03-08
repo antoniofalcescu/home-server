@@ -1,4 +1,5 @@
 import express from 'express';
+import process from 'node:process';
 import { EnvHelper } from './logic/src/common/helpers';
 import { authenticationRouter, mediaRouter, torrentRouter } from './logic/src/common/router';
 import { Container } from './logic/src/injectable';

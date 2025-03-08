@@ -3,7 +3,7 @@ import { LoggerService } from '../../common/services/logger';
 import { Container } from '../../injectable';
 import { SERVICE_NAME } from '../../injectable/constants';
 import { MediaHandlerFactory } from './handler';
-import { MediaHandlerType } from './handler/types';
+import { MediaHandlerDependencies, MediaHandlerType } from './handler/types';
 
 export class MediaService {
   private readonly loggerService: LoggerService;
@@ -13,11 +13,14 @@ export class MediaService {
   constructor() {
     this.loggerService = Container.get<LoggerService>(SERVICE_NAME.LOGGER);
 
-    this.mediaHandlerFactory = new MediaHandlerFactory();
+    const mediaHandlerDependencies: MediaHandlerDependencies = {
+      loggerService: this.loggerService,
+    };
+    this.mediaHandlerFactory = new MediaHandlerFactory(mediaHandlerDependencies);
   }
 
   public async onDownloadFinished(name: string, type: string): Promise<void> {
     const mediaHandler = this.mediaHandlerFactory.getHandler(type);
-    return mediaHandler.onDownloadFinished({ name, type: type as MediaHandlerType });
+    await mediaHandler.onDownloadFinished({ name, type: type as MediaHandlerType });
   }
 }

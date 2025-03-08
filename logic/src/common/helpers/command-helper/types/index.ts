@@ -1,1 +1,1 @@
-export * from './command-builder';
+export * from './command-helper';

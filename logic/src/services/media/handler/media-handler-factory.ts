@@ -2,12 +2,15 @@ import { MEDIA_HANDLER_TYPE } from './constants';
 import { InvalidMediaHandlerTypeError } from './errors';
 import { JellyfinMediaHandler } from './instances/jellyfin';
 import { MediaHandler } from './interfaces';
-import { MediaHandlerType } from './types';
+import { MediaHandlerDependencies, MediaHandlerType } from './types';
 
 export class MediaHandlerFactory {
-  private readonly handlers: Record<MediaHandlerType, new () => MediaHandler>;
+  private readonly dependencies: MediaHandlerDependencies;
 
-  constructor() {
+  private readonly handlers: Record<MediaHandlerType, new (dependencies: MediaHandlerDependencies) => MediaHandler>;
+
+  constructor(dependencies: MediaHandlerDependencies) {
+    this.dependencies = dependencies;
     this.handlers = {
       [MEDIA_HANDLER_TYPE.MOVIE]: JellyfinMediaHandler,
       [MEDIA_HANDLER_TYPE.TV_SHOW]: JellyfinMediaHandler,
@@ -20,7 +23,7 @@ export class MediaHandlerFactory {
     }
 
     const HandlerClass = this.handlers[type];
-    return new HandlerClass();
+    return new HandlerClass(this.dependencies);
   }
 
   private _isMediaHandlerType(type: string): type is MediaHandlerType {
