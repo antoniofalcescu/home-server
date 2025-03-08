@@ -1,6 +1,7 @@
 import express from 'express';
+import process from 'node:process';
 import { EnvHelper } from './logic/src/common/helpers';
-import { authenticationRouter, torrentRouter } from './logic/src/common/router';
+import { authenticationRouter, mediaRouter, torrentRouter } from './logic/src/common/router';
 import { Container } from './logic/src/injectable';
 import { TorrentSessionManager } from './logic/src/jobs/torrent-session-manager';
 
@@ -11,8 +12,7 @@ app.use(express.json());
 
 app.use(authenticationRouter);
 app.use(torrentRouter);
-
-// TODO: check how ffmpeg works to convert mkv to phone for direct play on jellyfin
+app.use(mediaRouter);
 
 // TODO: TailScale for Jellyfin (can't stream with CF tunnels) and CF Tunnels for home-server site
 // TODO: check what media video/audio is supported on iphone/android and how to maybe download/convert existing ones after downloading them once
@@ -20,7 +20,7 @@ app.use(torrentRouter);
 app.listen(port, async () => {
   EnvHelper.verify();
   await Container.init();
-  // await TorrentSessionManager.start();
+  await TorrentSessionManager.start();
   console.log(`Example app listening on port ${port}`);
 
   // TODO: investigate how exactly and if SIGINT supports async ops

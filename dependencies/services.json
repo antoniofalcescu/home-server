@@ -26,5 +26,9 @@
   {
     "name": "TorrentService",
     "path": "./dist/logic/src/services/torrent/torrent-service.js"
+  },
+  {
+    "name": "MediaService",
+    "path": "./dist/logic/src/services/media/media-service.js"
   }
 ]

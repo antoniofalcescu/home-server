@@ -6,4 +6,5 @@ export const SERVICE_NAME = {
   CONTEXT: 'ContextService',
   SESSION: 'SessionService',
   TORRENT: `TorrentService`,
+  MEDIA: `MediaService`,
 };

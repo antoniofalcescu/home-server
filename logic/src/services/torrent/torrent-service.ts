@@ -31,7 +31,7 @@ export class TorrentService {
       } = context;
 
       const searchResponse = await fetch(
-        `${SEARCH_ENDPOINT}?search=${encodeURIComponent(torrentName)}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`,
+        `${SEARCH_ENDPOINT}?search=${encodeURIComponent(torrentName)}&searchin=${TORRENT_MAPPING.SEARCH_IN.NAME}&sort=${TORRENT_MAPPING.SORT.DOWNLOAD}`,
         {
           credentials: 'include',
           headers: {
@@ -50,36 +50,37 @@ export class TorrentService {
   }
 
   public async download(context: Context, torrentId: string): Promise<void> {
-    const { TORRENT_DOWNLOAD_PATH } = EnvHelper.get();
-    const torrentPath = `${TORRENT_DOWNLOAD_PATH}/${torrentId}.torrent`;
-
-    if (!fs.existsSync(torrentPath)) {
-      const {
-        session: {
-          torrent: { cookies },
-        },
-      } = context;
-
-      const downloadRes = await fetch(`${DOWNLOAD_ENDPOINT}?id=${encodeURIComponent(torrentId)}`, {
-        credentials: 'include',
-        headers: {
-          Cookie: cookies,
-          'user-agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
-        },
-      });
-
-      const buffer = await downloadRes.arrayBuffer();
-      const fileArray = new Uint8Array(buffer);
-
-      fs.writeFileSync(torrentPath, fileArray);
-    }
+    const { ABSOLUTE_PATH_DOWNLOADS } = EnvHelper.get();
+    const torrentPath = `${ABSOLUTE_PATH_DOWNLOADS}/${torrentId}.torrent`;
 
     try {
+      if (!fs.existsSync(torrentPath)) {
+        const {
+          session: {
+            torrent: { cookies },
+          },
+        } = context;
+
+        const downloadRes = await fetch(`${DOWNLOAD_ENDPOINT}?id=${encodeURIComponent(torrentId)}`, {
+          credentials: 'include',
+          headers: {
+            Cookie: cookies,
+            'user-agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+          },
+        });
+
+        const buffer = await downloadRes.arrayBuffer();
+        const fileArray = new Uint8Array(buffer);
+
+        fs.writeFileSync(torrentPath, fileArray);
+      }
+
       this.torrentDownloader.start(torrentPath);
     } catch (error) {
       this.loggerService.warn('Failed to download torrent', {
         torrentPath,
+        torrentId,
         error,
       });
 
